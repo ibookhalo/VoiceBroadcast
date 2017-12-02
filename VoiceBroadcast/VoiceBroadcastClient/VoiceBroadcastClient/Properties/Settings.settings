@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="VoiceBroadcastClient.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="clientName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="serverIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">127.0.0.1</Value>
+    </Setting>
+    <Setting Name="serverPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">6666</Value>
+    </Setting>
+    <Setting Name="inputDeviceName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Kein</Value>
+    </Setting>
+    <Setting Name="outputDeviceName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Kein</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
