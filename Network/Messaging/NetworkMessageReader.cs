@@ -7,20 +7,22 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace  Network.Messaging
+namespace Network.Messaging
 {
-    public class NetworkMessageReader:IDisposable
+    public class NetworkMessageReader
     {
         private bool readLoop;
         public TcpClient TcpClient { private set; get; }
         private NetworkStream netStream;
 
-        public delegate void ReadCompletedHandler(object obj, NetworkMessageReaderReadCompletedEventArgs  e);
+        public delegate void ReadCompletedHandler(object obj, NetworkMessageReaderReadCompletedEventArgs e);
         public delegate void ReadErrorHandler(object obj, NetworkMessageReaderReadErrorEventArgs e);
 
         public event ReadCompletedHandler ReadCompleted;
         public event ReadErrorHandler ReadError;
-        Byte[] buffer;
+
+        public bool StopReadingOnError { get; set; }
+
         public NetworkMessageReader(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
@@ -30,7 +32,7 @@ namespace  Network.Messaging
             this.readLoop = readLoop;
             TcpClient.ReceiveBufferSize = NetworkMessage.MAX_SIZE_BYTE;
 
-            buffer = new Byte[NetworkMessage.MAX_SIZE_BYTE];
+            byte[] buffer = new byte[NetworkMessage.MAX_SIZE_BYTE];
             netStream = TcpClient.GetStream();
             if (netStream.CanRead)
             {
@@ -53,7 +55,6 @@ namespace  Network.Messaging
                 else
                     ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient,new ArgumentNullException("NetworkMessage is null")),null,null);
 
-
                 if (readLoop)
                 {
                     ReadAsync(readLoop);
@@ -62,25 +63,17 @@ namespace  Network.Messaging
             catch (Exception ex)
             {
                 ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex),null,null);
+
+                if (StopReadingOnError)
+                {
+                    netStream?.Close();
+                    TcpClient?.Close();
+
+                    ReadCompleted = null;
+                    ReadError = null;
+                }
             }
 
-        }
-
-        public void Dispose()
-        {
-            TcpClient?.Client?.Disconnect(false);
-            TcpClient?.Client?.Dispose();
-            TcpClient?.Close();
-            
-            netStream?.Close();
-            netStream?.Dispose();
-
-            ReadCompleted = null;
-            ReadError = null;
-
-            TcpClient = null;
-            netStream = null;
-            buffer = null;
         }
     }
 }

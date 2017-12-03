@@ -19,8 +19,6 @@ namespace VoiceBroadcastServer
                     var _args = args[0].Split(new char[] { ':' });
                     server.Init(_args[0], int.Parse(_args[1]));
 
-                    Logger.log.Info("Server started ...");
-                    Logger.log.Info("Waiting for clients ...");
                     server.AcceptClientsForEver();
                 }
                 catch (Exception ex)
