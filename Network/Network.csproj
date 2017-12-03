@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="BroadCastClient.cs" />
     <Compile Include="EventArgs\BroadcastClientConnectedEventArgs.cs" />
+    <Compile Include="Messaging\ConnectMessage.cs" />
     <Compile Include="Messaging\NetworkMessage.cs" />
     <Compile Include="EventArgs\NetworkMessageErrorEventArgs.cs" />
     <Compile Include="Messaging\NetworkMessageFormatter.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Messaging\NetworkMessageWriter.cs" />
     <Compile Include="EventArgs\NetworkMessageWriterWriteCompletedEventArgs.cs" />
     <Compile Include="EventArgs\NetworkMessageWriterWriteErrorEventArgs.cs" />
+    <Compile Include="Messaging\VoiceMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

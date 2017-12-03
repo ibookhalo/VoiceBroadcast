@@ -15,56 +15,72 @@ namespace VoiceBroadcastClient
 {
     public partial class MainForm : Form
     {
-        private NotifyIcon trayIcon = new NotifyIcon();
+        private NotifyIcon appTaskbarIcon;
         private ConfigForm configForm;
-        private TCPClient tcpClient;
         private bool isConnectedToServer;
         private bool allreadyShown,firstTimeShownTrayIcon;
-        private System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        private NotifyIcon notifyIconBalloon;
 
+        private System.Diagnostics.Stopwatch stopWatch;
         public MainForm()
         {
-            InitializeComponent();
-            this.Disposed += FormBroadcastClient_Disposed;
-            trayIcon.Icon = new Icon(Properties.Resources.appicon, 40, 40);
-            trayIcon.Click += TrayIcon_Click;
-            trayIcon.ContextMenu = new ContextMenu(new MenuItem[] {
+            InitializeComponent();            
+
+            appTaskbarIcon = new NotifyIcon();
+            stopWatch = new System.Diagnostics.Stopwatch();
+
+            appTaskbarIcon.Click += TrayIcon_Click;
+            Disposed += FormBroadcastClient_Disposed;
+
+            appTaskbarIcon.Icon = new Icon(Properties.Resources.appIcon, 40, 40);
+            appTaskbarIcon.ContextMenu = new ContextMenu(new MenuItem[] {
                 new MenuItem("Einstellungen",openConfig),
-                new MenuItem("Schließen", exit)});
-            setTrayIconStateToConnected(false);
-            trayIcon.Visible = true;
+                new MenuItem("Beenden", exit)});
+            appTaskbarIcon.Visible = true;
 
+            setFormAboveWindowsTaskBar();
             connectToServer();
-        }
 
+            refreshAppTaskbarIconState();
+        }
         private void TrayIcon_Click(object sender, EventArgs e)
         {
+            refreshAppTaskbarIconState();
             if (isConnectedToServer)
             {
-                show();
+                showForm();
             }
         }
-        private void setTrayIconStateToConnected(bool isConnected)
+        private void showNotificationBalloon(string message)
         {
-            if (trayIcon != null)
+            if (notifyIconBalloon==null)
             {
-                trayIcon.Text = string.Format("{0} | {1}", AppDomain.CurrentDomain.FriendlyName, isConnected ? "Verbunden" : "Keine Verbindung");
+                notifyIconBalloon = new NotifyIcon();
+                notifyIconBalloon.Icon = Properties.Resources.appIcon;
+                notifyIconBalloon.BalloonTipClicked +=(_ob,_e)=>{ notifyIconBalloon.Visible = false;notifyIconBalloon.Dispose(); };
+                notifyIconBalloon.Visible = true;
+                notifyIconBalloon.ShowBalloonTip(2000, Text, message,ToolTipIcon.Error);
+            }
+            else
+            {
+                notifyIconBalloon.Dispose();
+                notifyIconBalloon = null;
+                showNotificationBalloon(message);
             }
         }
 
+        private void refreshAppTaskbarIconState()
+        {
+            appTaskbarIcon.Icon = isConnectedToServer ? Properties.Resources.appIconOn : Properties.Resources.appIconOff;
+            appTaskbarIcon.Text = string.Format("{0} | {1}", AppDomain.CurrentDomain.FriendlyName, isConnectedToServer ? "Verbunden" : "Keine Verbindung");
+        }
         private void connectToServer()
         {
             try
             {
                 var conf = AppConfiguration.ReadConfig();
-                tcpClient = new TCPClient(conf.ServerIP, conf.ServerPort);
-                tcpClient.AutoConnect = true;
-                tcpClient.AutoConnectInterval = 5;
-                tcpClient.ClientConnected += new TCPClient.DelegateConnection(OnClientConnected);
-                tcpClient.ClientDisconnected += new TCPClient.DelegateConnection(OnClientDisconnected);
-                tcpClient.ExceptionAppeared += new TCPClient.DelegateException(OnClientExceptionAppeared);
-                tcpClient.DataReceived += new TCPClient.DelegateDataReceived(OnClientDataReceived);
-                tcpClient.Connect();
+                
+                //
                 isConnectedToServer = true;
             }
             catch (Exception ex)
@@ -73,33 +89,6 @@ namespace VoiceBroadcastClient
                 Logger.log.Error(ex);
             }
         }
-
-        private void OnClientDataReceived(TCPClient client, byte[] bytes)
-        {
-            
-        }
-
-        private void OnClientExceptionAppeared(TCPClient client, Exception ex)
-        {
-            isConnectedToServer = false;
-            Logger.log.Error(ex);
-            setTrayIconStateToConnected(false);
-        }
-
-        private void OnClientDisconnected(TCPClient client, string Info)
-        {
-            isConnectedToServer = false;
-            Logger.log.Info("Client disconnected");
-            setTrayIconStateToConnected(false);
-        }
-
-        private void OnClientConnected(TCPClient client, string Info)
-        {
-            isConnectedToServer = true;
-            Logger.log.Info("Client connected");
-            setTrayIconStateToConnected(true);
-        }
-
         private void openConfig(object sender, EventArgs e)
         {
             if (configForm == null)
@@ -115,10 +104,14 @@ namespace VoiceBroadcastClient
         {
             Application.Exit();
         }
-        private void show()
+        private void setFormAboveWindowsTaskBar()
         {
             Left = Cursor.Position.X;
-            Top = Screen.PrimaryScreen.WorkingArea.Bottom - this.Height - (firstTimeShownTrayIcon?-10:50);
+            Top = Screen.PrimaryScreen.WorkingArea.Bottom - this.Height - (firstTimeShownTrayIcon ? -10 : 50);
+        }
+        private void showForm()
+        {
+            setFormAboveWindowsTaskBar();
             Visible = true;
             allreadyShown = true;
             Text = "Aufnehmen";
@@ -138,14 +131,13 @@ namespace VoiceBroadcastClient
         }
         private void FormBroadcastClient_Disposed(object sender, EventArgs e)
         {
-            trayIcon.Visible = false;
-            trayIcon.Dispose();
+            appTaskbarIcon.Visible = false;
+            appTaskbarIcon.Dispose();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
             hide();
         }
-
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
             if (allreadyShown && Visible)
@@ -153,11 +145,10 @@ namespace VoiceBroadcastClient
                 hide();
             }
         }
-
         private void btnRecord_MouseDown(object sender, MouseEventArgs e)
         {
             btnRecord.Image = Properties.Resources.Speak_On;
-            sw.Start();
+            stopWatch.Start();
             timerDuration.Start();
             lblDuration.Visible = true;
             lblDuration.Text = "00:00:00";
@@ -166,15 +157,15 @@ namespace VoiceBroadcastClient
         private void btnRecord_MouseUp(object sender, MouseEventArgs e)
         {
             btnRecord.Image = Properties.Resources.Speak_Off;
-            sw.Stop();
-            sw.Reset();
+            stopWatch.Stop();
+            stopWatch.Reset();
             timerDuration.Stop();
             lblDuration.Visible = false;
         }
 
         private void timerDuration_Tick(object sender, EventArgs e)
         {
-            lblDuration.Text = sw.Elapsed.ToString(@"hh\:mm\:ss");
+            lblDuration.Text = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
 
         private void btnRecord_Click(object sender, EventArgs e)

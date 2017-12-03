@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,12 +11,11 @@ namespace Network
     public class BroadCastClient
     {
         public string ClientName { private set; get; }
-        public int ClientId { private set; get; }
-
-        public BroadCastClient(string clientName, int clientId)
+        public uint? Id { private set; get; }
+        public BroadCastClient(string clientName, uint? clientId)
         {
             this.ClientName = clientName;
-            this.ClientId = clientId;
+            this.Id = clientId;
         }
     }
 

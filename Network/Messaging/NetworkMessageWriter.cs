@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace  Network.Messaging
 {
-    public class NetworkMessageWriter
+    public class NetworkMessageWriter:IDisposable
     {
         public TcpClient TcpClient { private set; get; }
         private NetworkStream netStream;
@@ -23,26 +23,22 @@ namespace  Network.Messaging
 
         public NetworkMessageWriter(TcpClient tcpClient)
         {
-            this.TcpClient = tcpClient;
+            TcpClient = tcpClient;
         }
-
-        public void Stop()
-        {
-            this.netStream?.Dispose();
-        }
+        
         public void WriteAsync(NetworkMessage netMessage)
         {
             try
             {
-                TcpClient.SendBufferSize = NetworkMessage.MAX_DATA_SIZE_IN_BYTES;
                 byte[] buffer = new NetworkMessageFormatter<NetworkMessage>().Serialize(netMessage);
 
+                TcpClient.SendBufferSize = buffer.Length;
                 netStream = TcpClient.GetStream();
                 netStream.BeginWrite(buffer, 0, buffer.Length, writeCallback,netMessage);
             }
             catch (Exception ex)
             {
-                WriteError?.Invoke(this, new NetworkMessageWriterWriteErrorEventArgs(netMessage,TcpClient,ex));
+                WriteError?.BeginInvoke(this, new NetworkMessageWriterWriteErrorEventArgs(netMessage,TcpClient,ex),null,null);
             }
         }
 
@@ -51,12 +47,19 @@ namespace  Network.Messaging
             try
             {
                 netStream.EndWrite(ar);
-                WriteCompleted?.Invoke(this, new NetworkMessageWriterWriteCompletedEventArgs(ar.AsyncState as NetworkMessage,TcpClient));
+                WriteCompleted?.BeginInvoke(this, new NetworkMessageWriterWriteCompletedEventArgs(ar.AsyncState as NetworkMessage,TcpClient),null,null);
             }
             catch (Exception ex)
             {
-                WriteError?.Invoke(this, new NetworkMessageWriterWriteErrorEventArgs(ar.AsyncState as NetworkMessage, TcpClient, ex));
+                WriteError?.BeginInvoke(this, new NetworkMessageWriterWriteErrorEventArgs(ar.AsyncState as NetworkMessage, TcpClient, ex),null,null);
             }
+        }
+
+        public void Dispose()
+        {
+            TcpClient?.Close();
+            netStream?.Close();
+            netStream?.Dispose();
         }
     }
 }

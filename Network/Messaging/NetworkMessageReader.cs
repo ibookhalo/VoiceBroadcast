@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace  Network.Messaging
 {
-    public class NetworkMessageReader:NetworkMessage
+    public class NetworkMessageReader:IDisposable
     {
         private bool readLoop;
         public TcpClient TcpClient { private set; get; }
@@ -23,26 +23,22 @@ namespace  Network.Messaging
 
         public NetworkMessageReader(TcpClient tcpClient)
         {
-            this.TcpClient = tcpClient;
-        }
-
-        public void Stop()
-        {
-            netStream?.Close();
+            TcpClient = tcpClient;
         }
         public void ReadAsync(bool readLoop = false)
         {
             try
             {
                 this.readLoop = readLoop;
+                TcpClient.ReceiveBufferSize = NetworkMessage.MAX_SIZE_BYTE;
 
-                byte[] buffer = new byte[TcpClient.ReceiveBufferSize = NetworkMessage.MAX_DATA_SIZE_IN_BYTES];
+                byte[] buffer = new byte[NetworkMessage.MAX_SIZE_BYTE];
                 netStream = TcpClient.GetStream();
                 netStream.BeginRead(buffer, 0, buffer.Length, readCallback,buffer);
             }
             catch (Exception ex)
             {
-                ReadError?.Invoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex));
+                ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex),null,null);
             }
         }
 
@@ -53,9 +49,9 @@ namespace  Network.Messaging
                 netStream.EndRead(ar);
                 NetworkMessage netMesasge = new NetworkMessageFormatter<NetworkMessage>().Deserialize(ar.AsyncState as byte[]);
                 if (netMesasge!=null)
-                    ReadCompleted?.Invoke(this, new NetworkMessageReaderReadCompletedEventArgs(netMesasge, TcpClient));
+                    ReadCompleted?.BeginInvoke(this, new NetworkMessageReaderReadCompletedEventArgs(netMesasge, TcpClient),null,null);
                 else
-                    ReadError?.Invoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient,new ArgumentNullException("NetworkMessage is null")));
+                    ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient,new ArgumentNullException("NetworkMessage is null")),null,null);
 
 
                 if (readLoop)
@@ -65,9 +61,16 @@ namespace  Network.Messaging
             }
             catch (Exception ex)
             {
-                ReadError?.Invoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex));
+                ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex),null,null);
             }
 
+        }
+
+        public void Dispose()
+        {
+            TcpClient?.Close();
+            netStream?.Close();
+            netStream?.Dispose();
         }
     }
 }
