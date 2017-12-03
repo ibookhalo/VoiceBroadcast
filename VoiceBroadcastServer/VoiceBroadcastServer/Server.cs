@@ -13,59 +13,51 @@ namespace VoiceBroadcastServer
     class Server
     {
         private TcpListener tcpListener;
-        private List<ServerBroadCastClient> clients;
+        private List<ServerBroadcastClient> clients;
         private uint lastClientID = 0;
         private object clientLocker = new object();
         public Server()
         {
-            clients = new List<ServerBroadCastClient>();
+            clients = new List<ServerBroadcastClient>();
         }
 
         public void Init(string ip,int port)
         {
-            try
-            {
-                tcpListener = new TcpListener(new System.Net.IPEndPoint(IPAddress.Parse(ip), port));
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            tcpListener = new TcpListener(new System.Net.IPEndPoint(IPAddress.Parse(ip), port));
         }
 
         public void AcceptClientsForEver()
         {
-            try
+            tcpListener.Start();
+            while (true)
             {
-                tcpListener.Start();
                 try
                 {
-                    while (true)
-                    {
-                        TcpClient newClient = tcpListener.AcceptTcpClient();
-                        clients.Add(new ServerBroadCastClient(new BroadCastClient(null,null), newClient));
+                    TcpClient newClient = tcpListener.AcceptTcpClient();
+                    clients.Add(new ServerBroadcastClient(new BroadCastClient(null, null), newClient));
 
-                        NetworkMessageReader messageReader = new NetworkMessageReader(newClient);
-                        messageReader.ReadCompleted += MessageReader_ReadCompleted;
-                        messageReader.ReadError += MessageReader_ReadError;
-                        messageReader.ReadAsync(true);
-                    }
+                    NetworkMessageReader messageReader = new NetworkMessageReader(newClient);
+                    messageReader.ReadCompleted += MessageReader_ReadCompleted;
+                    messageReader.ReadError += MessageReader_ReadError;
+                    messageReader.ReadAsync(true);
                 }
                 catch (Exception ex)
                 {
                     Logger.log.Error(ex);
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
         }
 
         private void MessageReader_ReadError(object obj, Network.EventArgs.NetworkMessageReaderReadErrorEventArgs e)
         {
-            
+            if (!e.TcpClient.Connected)
+            {
+                (obj as NetworkMessageReader).Dispose();
+                lock (clients)
+                {
+                    clients.RemoveAll(client => client.TcpClient.Equals(e.TcpClient));
+                }
+            }
         }
 
         private void MessageReader_ReadCompleted(object obj, Network.EventArgs.NetworkMessageReaderReadCompletedEventArgs e)
@@ -87,7 +79,7 @@ namespace VoiceBroadcastServer
         {
             if (voiceMessage.Sender.Id.HasValue && existsClientIdInClientList(voiceMessage.Sender.Id.Value))
             {
-                foreach (ServerBroadCastClient client in clients.Where(client => !client.Client.Id.Value.Equals(voiceMessage.Sender.Id.Value)).ToList())
+                foreach (ServerBroadcastClient client in clients.Where(client => !client.Client.Id.Value.Equals(voiceMessage.Sender.Id.Value)).ToList())
                 {
                     // sendBroadcast
                     try
@@ -121,11 +113,13 @@ namespace VoiceBroadcastServer
                         {
                             // refresh client in the list
                             clients.Remove(clientInList);
-                            clients.Add(new ServerBroadCastClient(new BroadCastClient(connectMessage.BroadCastClient.ClientName,
+                            clients.Add(new ServerBroadcastClient(new BroadCastClient(connectMessage.BroadCastClient.Name,
                                                                     connectMessage.BroadCastClient.Id), sender));
                         }
                         connectMessage.Connected = true;
                         messageWriter.WriteAsync(connectMessage);
+
+                        Logger.log.Info($"client connected {connectMessage.BroadCastClient}");
                     }
                     else
                     {
@@ -136,13 +130,17 @@ namespace VoiceBroadcastServer
                 else
                 {
                     // client want to connect and does not have an id ...
+                    var newClient = new BroadCastClient(connectMessage.BroadCastClient.Name, ++lastClientID);
                     lock (clients)
                     {
-                        clients.Add(new ServerBroadCastClient(new BroadCastClient(connectMessage.BroadCastClient.ClientName, ++lastClientID),sender));
+                        clients.Add(new ServerBroadcastClient(newClient,sender));
                     }
                     // send client ConnectAck Message
                     connectMessage.Connected = true;
+                    connectMessage.BroadCastClient = newClient;
                     messageWriter.WriteAsync(connectMessage);
+
+                    Logger.log.Info($"New client connected {connectMessage.BroadCastClient}");
                 }
             }
             catch (Exception ex)

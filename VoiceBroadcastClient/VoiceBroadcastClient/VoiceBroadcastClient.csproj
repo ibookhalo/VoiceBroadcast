@@ -71,7 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\Client.cs" />
+    <Compile Include="Classes\TcpBroadCastClient.cs" />
     <Compile Include="WindowsForms\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>

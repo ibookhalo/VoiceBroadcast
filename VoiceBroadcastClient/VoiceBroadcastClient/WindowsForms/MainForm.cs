@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VoiceBroadcastClient.Classes;
 using WinSound;
 
 namespace VoiceBroadcastClient
@@ -17,15 +18,17 @@ namespace VoiceBroadcastClient
     {
         private NotifyIcon appTaskbarIcon;
         private ConfigForm configForm;
-        private bool isConnectedToServer;
         private bool allreadyShown,firstTimeShownTrayIcon;
         private NotifyIcon notifyIconBalloon;
+
+        private TcpBroadcastClient client;
 
         private System.Diagnostics.Stopwatch stopWatch;
         public MainForm()
         {
-            InitializeComponent();            
+            InitializeComponent();
 
+            client = new TcpBroadcastClient();
             appTaskbarIcon = new NotifyIcon();
             stopWatch = new System.Diagnostics.Stopwatch();
 
@@ -39,16 +42,21 @@ namespace VoiceBroadcastClient
             appTaskbarIcon.Visible = true;
 
             setFormAboveWindowsTaskBar();
-            connectToServer();
 
-            refreshAppTaskbarIconState();
+            refreshAppTaskbarIconState(false);
+            connectToServer();
         }
         private void TrayIcon_Click(object sender, EventArgs e)
         {
-            refreshAppTaskbarIconState();
-            if (isConnectedToServer)
+            var connected = client.Connected;
+            refreshAppTaskbarIconState(connected);
+            if (connected)
             {
                 showForm();
+            }
+            else
+            {
+
             }
         }
         private void showNotificationBalloon(string message)
@@ -69,23 +77,24 @@ namespace VoiceBroadcastClient
             }
         }
 
-        private void refreshAppTaskbarIconState()
+        private void refreshAppTaskbarIconState(bool connected)
         {
-            appTaskbarIcon.Icon = isConnectedToServer ? Properties.Resources.appIconOn : Properties.Resources.appIconOff;
-            appTaskbarIcon.Text = string.Format("{0} | {1}", AppDomain.CurrentDomain.FriendlyName, isConnectedToServer ? "Verbunden" : "Keine Verbindung");
+            appTaskbarIcon.Icon = connected ? Properties.Resources.appIconOn : Properties.Resources.appIconOff;
+            appTaskbarIcon.Text = string.Format("{0} | {1}", AppDomain.CurrentDomain.FriendlyName, connected ? "Verbunden" : "Keine Verbindung");
         }
         private void connectToServer()
         {
             try
             {
                 var conf = AppConfiguration.ReadConfig();
-                
+                client.Connect(conf.ServerIP, conf.ServerPort, new Network.BroadCastClient(conf.ClientName, null));
+
+
+                refreshAppTaskbarIconState(true);
                 //
-                isConnectedToServer = true;
             }
             catch (Exception ex)
             {
-                isConnectedToServer = false;
                 Logger.log.Error(ex);
             }
         }

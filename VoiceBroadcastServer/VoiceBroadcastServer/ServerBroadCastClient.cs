@@ -8,11 +8,11 @@ using Network;
 
 namespace VoiceBroadcastServer
 {
-    class ServerBroadCastClient
+    class ServerBroadcastClient
     {
         public Network.BroadCastClient Client { get; private set; }
         public TcpClient TcpClient { get; private set; }
-        public ServerBroadCastClient(Network.BroadCastClient client, TcpClient tcpClient)
+        public ServerBroadcastClient(Network.BroadCastClient client, TcpClient tcpClient)
         {
             this.Client = client;
             this.TcpClient = tcpClient;

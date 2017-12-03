@@ -11,6 +11,7 @@ namespace  Network.Messaging
 {
     public class NetworkMessageWriter:IDisposable
     {
+        Byte[] buffer;
         public TcpClient TcpClient { private set; get; }
         private NetworkStream netStream;
 
@@ -28,17 +29,17 @@ namespace  Network.Messaging
         
         public void WriteAsync(NetworkMessage netMessage)
         {
-            try
-            {
-                byte[] buffer = new NetworkMessageFormatter<NetworkMessage>().Serialize(netMessage);
+             buffer = new NetworkMessageFormatter<NetworkMessage>().Serialize(netMessage);
 
-                TcpClient.SendBufferSize = buffer.Length;
-                netStream = TcpClient.GetStream();
-                netStream.BeginWrite(buffer, 0, buffer.Length, writeCallback,netMessage);
-            }
-            catch (Exception ex)
+            TcpClient.SendBufferSize = buffer.Length;
+            netStream = TcpClient.GetStream();
+            if (netStream.CanWrite)
             {
-                WriteError?.BeginInvoke(this, new NetworkMessageWriterWriteErrorEventArgs(netMessage,TcpClient,ex),null,null);
+                netStream.BeginWrite(buffer, 0, buffer.Length, writeCallback, netMessage);
+            }
+            else
+            {
+                throw new Exception("NetworkStream can not write");
             }
         }
 
@@ -60,6 +61,8 @@ namespace  Network.Messaging
             TcpClient?.Close();
             netStream?.Close();
             netStream?.Dispose();
+
+            buffer = null;
         }
     }
 }

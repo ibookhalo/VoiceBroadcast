@@ -9,10 +9,15 @@ namespace Network.Messaging
     public class ConnectMessage:NetworkMessage
     {
         public bool Connected { get; set; }
-        public BroadCastClient BroadCastClient { get; private set; }
+        public BroadCastClient BroadCastClient { get; set; }
         public ConnectMessage(BroadCastClient client)
         {
             this.BroadCastClient = client;
+        }
+
+        public override string ToString()
+        {
+            return BroadCastClient.ToString();
         }
     }
 }

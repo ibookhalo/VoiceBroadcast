@@ -19,36 +19,21 @@ namespace  Network.Messaging
         /// <returns>Liefert NULL, wenn die Deserialisierung fehlschlägt.</returns>
         public T Deserialize(byte[] data)
         {
-            try
+            BinaryFormatter bf = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream(data))
             {
-                BinaryFormatter bf = new BinaryFormatter();
-                using (MemoryStream ms = new MemoryStream(data))
-                {
-                   return bf.Deserialize(ms) as T;
-                }
-                
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                return bf.Deserialize(ms) as T;
             }
         }
 
        
         public byte[] Serialize(T message)
         {
-            try
+            BinaryFormatter bf = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream())
             {
-                BinaryFormatter bf = new BinaryFormatter();
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    bf.Serialize(ms, message);
-                    return ms.ToArray();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                bf.Serialize(ms, message);
+                return ms.ToArray();
             }
         }
     }

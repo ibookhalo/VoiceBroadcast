@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceBroadcastClient", "Voi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network", "..\Network\Network.csproj", "{2CA9EB81-DFAF-4DD6-935C-29A83C085E85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceBroadcastServer", "..\VoiceBroadcastServer\VoiceBroadcastServer\VoiceBroadcastServer.csproj", "{5A730B7E-C4F0-4B86-B2EC-3CD5C51AD087}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{2CA9EB81-DFAF-4DD6-935C-29A83C085E85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CA9EB81-DFAF-4DD6-935C-29A83C085E85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CA9EB81-DFAF-4DD6-935C-29A83C085E85}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5A730B7E-C4F0-4B86-B2EC-3CD5C51AD087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A730B7E-C4F0-4B86-B2EC-3CD5C51AD087}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A730B7E-C4F0-4B86-B2EC-3CD5C51AD087}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5A730B7E-C4F0-4B86-B2EC-3CD5C51AD087}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

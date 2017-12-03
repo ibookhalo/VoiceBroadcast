@@ -20,25 +20,25 @@ namespace  Network.Messaging
 
         public event ReadCompletedHandler ReadCompleted;
         public event ReadErrorHandler ReadError;
-
+        Byte[] buffer;
         public NetworkMessageReader(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
         }
         public void ReadAsync(bool readLoop = false)
         {
-            try
-            {
-                this.readLoop = readLoop;
-                TcpClient.ReceiveBufferSize = NetworkMessage.MAX_SIZE_BYTE;
+            this.readLoop = readLoop;
+            TcpClient.ReceiveBufferSize = NetworkMessage.MAX_SIZE_BYTE;
 
-                byte[] buffer = new byte[NetworkMessage.MAX_SIZE_BYTE];
-                netStream = TcpClient.GetStream();
-                netStream.BeginRead(buffer, 0, buffer.Length, readCallback,buffer);
-            }
-            catch (Exception ex)
+            buffer = new Byte[NetworkMessage.MAX_SIZE_BYTE];
+            netStream = TcpClient.GetStream();
+            if (netStream.CanRead)
             {
-                ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex),null,null);
+                netStream.BeginRead(buffer, 0, buffer.Length, readCallback, buffer);
+            }
+            else
+            {
+               throw  new Exception("NetworkStream can not read");
             }
         }
 
@@ -68,9 +68,19 @@ namespace  Network.Messaging
 
         public void Dispose()
         {
+            TcpClient?.Client?.Disconnect(false);
+            TcpClient?.Client?.Dispose();
             TcpClient?.Close();
+            
             netStream?.Close();
             netStream?.Dispose();
+
+            ReadCompleted = null;
+            ReadError = null;
+
+            TcpClient = null;
+            netStream = null;
+            buffer = null;
         }
     }
 }
