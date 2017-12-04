@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using Network;
 using Network.Messaging;
 using System.Threading;
-using System.Runtime.InteropServices;
 using System.Net.NetworkInformation;
 
 namespace VoiceBroadcastServer
@@ -18,38 +15,12 @@ namespace VoiceBroadcastServer
         private TcpListener tcpListener;
         private List<ServerBroadcastClient> clients;
         private uint lastClientID = 0;
-        private object clientLocker = new object();
-        private Timer nicStateCheckerTimer;
+        private NetworkInterfaceStateNotifier nicNotifier;
         private IPEndPoint localEndPoint;
-        private DateTime lastTcpListenError;
-
         public Server()
         {
             clients = new List<ServerBroadcastClient>();
-            nicStateCheckerTimer = new Timer(adapterStateCheckerTimerCallback, null, 5, 5000); // every 5 sec check nic state ...
-        }
-
-        private void adapterStateCheckerTimerCallback(object state)
-        {
-            Logger.log.Info("Timer ...");
-            lock (tcpListener)
-            {
-                var nic = getNetworkAdapterByIP(localEndPoint.Address);
-                if (nic != null)
-                {
-                    if (nic.OperationalStatus != OperationalStatus.Up)
-                    {
-                        // cable unplugged ?
-                        tcpListener.Stop();
-                    }
-                }
-                else
-                {
-                    // nic is disable ?
-                    tcpListener.Stop();
-                }
-
-            }
+            
         }
         private bool Connected
         {
@@ -86,30 +57,11 @@ namespace VoiceBroadcastServer
                 }
             }
         }
-        private NetworkInterface getNetworkAdapterByIP(IPAddress ip)
-        {
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                {
-                    foreach (UnicastIPAddressInformation ipInfo in nic.GetIPProperties().UnicastAddresses)
-                    {
-                        if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && ipInfo.Address.Equals(ip))
-                        {
-                            return nic;
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
         public void Init(string ip, int port)
         {
             tcpListener = new TcpListener(localEndPoint = new System.Net.IPEndPoint(IPAddress.Parse(ip), port));
         }
-
-        private void restartTcpListener()
+        private bool restartTcpListener()
         {
             lock (tcpListener)
             {
@@ -117,9 +69,12 @@ namespace VoiceBroadcastServer
                 {
                     tcpListener.Stop();
                     tcpListener.Start();
+                    return true;
                 }
                 catch
-                {}
+                {
+                    return false;
+                }
             }
         }
         public void AcceptClientsForEver()
@@ -128,73 +83,110 @@ namespace VoiceBroadcastServer
             {
                 tcpListener.Start();
             }
+            if (nicNotifier==null)
+            {
+                nicNotifier = new NetworkInterfaceStateNotifier(5000, localEndPoint.Address);
+                nicNotifier.NetworkInterfaceIsNotUpEvent += NicNotifier_NetworkInterfaceIsNotUpEvent;
+            }
 
             while (true)
             {
                 try
                 {
                     Logger.log.Info("Waiting for clients ...");
-                    TcpClient newClient = tcpListener.AcceptTcpClient();
 
-                    clients.Add(new ServerBroadcastClient(new BroadCastClient(null, null), newClient));
-
-                    NetworkMessageReader messageReader = new NetworkMessageReader(newClient);
+                    NetworkMessageReader messageReader = new NetworkMessageReader(tcpListener.AcceptTcpClient());
                     messageReader.ReadCompleted += MessageReader_ReadCompleted;
                     messageReader.ReadError += MessageReader_ReadError;
 
-                    messageReader.StopReadingOnError = true;
+                    messageReader.OnErrorStopReadingAndCloseClient = true;
                     messageReader.ReadAsync(true);
                 }
                 catch (Exception ex)
                 {
                     Logger.log.Error(ex);
-
-                    if ((DateTime.Now-lastTcpListenError).TotalMilliseconds < 1000) 
+                    bool needTcpListenerRestart = true;
+                    while (needTcpListenerRestart)
                     {
-                        // every 10 sec
-                        Thread.Sleep(10000);
+                        while (restartTcpListener())
+                        {
+                            needTcpListenerRestart = false;
+                            break;
+                        }
+                        Thread.Sleep(5000); // wait 5 sec
                     }
-                    restartTcpListener();
-                    lastTcpListenError = DateTime.Now;
                 }
             }
         }
-        
 
-        private void removeClientFromListByTcpClient(TcpClient tcpClient)
+        private void NicNotifier_NetworkInterfaceIsNotUpEvent(object obj, EventArgs e)
         {
+            lock (tcpListener)
+            {
+                tcpListener.Stop(); // interrupt  tcpListener.AcceptTcpClient() ...
+            }
+        }
+
+        private void removeClientFromListByTcpClient(TcpClient tcpClient,bool closeClient=false)
+        {
+            if (closeClient)
+            {
+                Logger.log.Info($"Closing client connection: {getServerBroadcastClientByTcpClient(tcpClient)?.Client}");
+                tcpClient?.Close();
+            }
             lock (clients)
             {
                 clients.RemoveAll(client => client.TcpClient.Equals(tcpClient));
             }
         }
-        private void MessageReader_ReadError(object obj, Network.EventArgs.NetworkMessageReaderReadErrorEventArgs e)
+        private void removeClientsFromListByTcpClients(List<TcpClient> tcpClients,bool closeClients=false)
         {
-            removeClientFromListByTcpClient(e.TcpClient);
+            tcpClients.ForEach(client => removeClientFromListByTcpClient(client,closeClients));
+        }
+        private void MessageReader_ReadError(object obj, Network.EventArgs.NetworkMessageErrorEventArgs e)
+        {
+            Logger.log.Info($"Read error: {getServerBroadcastClientByTcpClient(e.TcpClient)?.Client}");
+            removeClientFromListByTcpClient(e.TcpClient,true);
         }
         private void MessageWriter_WriteError(object obj, Network.EventArgs.NetworkMessageWriterWriteErrorEventArgs e)
         {
-            removeClientFromListByTcpClient(e.TcpClient);
+            removeClientFromListByTcpClient(e.TcpClient,true);
         }
         private void MessageReader_ReadCompleted(object obj, Network.EventArgs.NetworkMessageReaderReadCompletedEventArgs e)
         {
-            if (e.NetworkMessage is ConnectMessage)
+            try
             {
-                handleConnectMessage(e.NetworkMessage as ConnectMessage, e.TcpClient, obj as NetworkMessageReader);
+                if (e.NetworkMessage is ConnectMessage)
+                {
+                    handleConnectMessage(e.NetworkMessage as ConnectMessage, e.TcpClient, obj as NetworkMessageReader);
+                }
+                else if (e.NetworkMessage is VoiceMessage)
+                {
+                    handleVoiceMessage(e.NetworkMessage as VoiceMessage, e.TcpClient, obj as NetworkMessageReader);
+                }
             }
-            else if (e.NetworkMessage is VoiceMessage)
+            catch (Exception ex) 
             {
-                handleVoiceMessage(e.NetworkMessage as VoiceMessage, e.TcpClient, obj as NetworkMessageReader);
+                Logger.log.Error(ex);
             }
         }
-        private bool existsClientIdInClientList(uint clientID)
+        private bool existsClientInClientListByTcpClientAndId(TcpClient tcpClient,uint clientID)
         {
-            return clients.Exists(client => client.Client.Id.Value.Equals(clientID));
+            return clients.Exists(client => client.Client.Id.Value.Equals(clientID) && client.TcpClient.Equals(tcpClient));
+        }
+
+        private ServerBroadcastClient getServerBroadcastClientByTcpClient(TcpClient tcpClient)
+        {
+            return clients.Find(client => client.TcpClient.Equals(tcpClient));
         }
         private void handleVoiceMessage(VoiceMessage voiceMessage, TcpClient sender, NetworkMessageReader networkMessageReader)
         {
-            if (voiceMessage.Sender.Id.HasValue && existsClientIdInClientList(voiceMessage.Sender.Id.Value))
+            if (voiceMessage.Sender.Id.HasValue && existsClientInClientListByTcpClientAndId(sender,voiceMessage.Sender.Id.Value))
             {
+                Logger.log.Info($"Voicemessage received from {getServerBroadcastClientByTcpClient(sender)}");
+
+                var clientsToRemove = new List<TcpClient>();
+
                 foreach (ServerBroadcastClient client in clients.Where(client => !client.Client.Id.Value.Equals(voiceMessage.Sender.Id.Value)).ToList())
                 {
                     // sendBroadcast
@@ -206,58 +198,49 @@ namespace VoiceBroadcastServer
                     }
                     catch (Exception ex)
                     {
+                        // connection error? client is offline? 
                         Logger.log.Error(ex);
+                        clientsToRemove.Add(client.TcpClient); 
                     }
                 }
+
+                removeClientsFromListByTcpClients(clientsToRemove);
             }
         }
         private void handleConnectMessage(ConnectMessage connectMessage, TcpClient sender, NetworkMessageReader messageReader)
         {
             try
             {
-                NetworkMessageWriter messageWriter = new NetworkMessageWriter(sender);
-                messageWriter.StopWritingOnError = true;
-                messageWriter.WriteError += MessageWriter_WriteError;
-
-                if (connectMessage.BroadCastClient.Id.HasValue)
+                if (connectMessage.BroadCastClient==null)
                 {
-                    // client has id ...
-                    // check if client id is in the list
-                    var clientInList = clients.Find(client => client.Client.Id.Value.Equals(connectMessage.BroadCastClient.Id.Value));
-                    if (clientInList != null)
-                    {
-                        lock (clients)
-                        {
-                            // refresh client in the list
-                            clients.Remove(clientInList);
-                            clients.Add(new ServerBroadcastClient(new BroadCastClient(connectMessage.BroadCastClient.Name,
-                                                                    connectMessage.BroadCastClient.Id), sender));
-                        }
-                        connectMessage.Connected = true;
-                        messageWriter.WriteAsync(connectMessage);
+                    // close
+                    sender.Close();
+                    return;
+                }
 
-                        Logger.log.Info($"client connected {connectMessage.BroadCastClient}");
-                    }
-                    else
+                if (connectMessage.BroadCastClient.Name!=null && connectMessage.BroadCastClient.Name.Length>2)
+                {
+                    var newClient = new BroadcastClient(connectMessage.BroadCastClient.Name, ++lastClientID);
+                    lock (clients)
                     {
-                        // disconnect client ...
-                        //
+                        clients.Add(new ServerBroadcastClient(newClient, sender));
                     }
+
+                    NetworkMessageWriter messageWriter = new NetworkMessageWriter(sender);
+                    messageWriter.OnErrorStopWritingAndCloseClient = true;
+                    messageWriter.WriteError += MessageWriter_WriteError;
+
+                    // send client ConnectMessage Message
+                    connectMessage.Connected = true;
+                    connectMessage.BroadCastClient = newClient; // modified ..
+                    messageWriter.WriteAsync(connectMessage);
+
+                    Logger.log.Info($"client connected {connectMessage.BroadCastClient}");
                 }
                 else
                 {
-                    // client want to connect and does not have an id ...
-                    var newClient = new BroadCastClient(connectMessage.BroadCastClient.Name, ++lastClientID);
-                    lock (clients)
-                    {
-                        clients.Add(new ServerBroadcastClient(newClient,sender));
-                    }
-                    // send client ConnectAck Message
-                    connectMessage.Connected = true;
-                    connectMessage.BroadCastClient = newClient;
-                    messageWriter.WriteAsync(connectMessage);
-
-                    Logger.log.Info($"New client connected {connectMessage.BroadCastClient}");
+                    // close
+                    sender.Close();
                 }
             }
             catch (Exception ex)

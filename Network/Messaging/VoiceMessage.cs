@@ -10,9 +10,9 @@ namespace Network.Messaging
     {
         
         public byte[] Data { get; private set; }
-        public BroadCastClient Sender { get; private set; }
+        public BroadcastClient Sender { get; private set; }
 
-        public VoiceMessage(BroadCastClient sender, byte[] data)
+        public VoiceMessage(BroadcastClient sender, byte[] data)
         {
             this.Sender = sender;
             this.Data = data;

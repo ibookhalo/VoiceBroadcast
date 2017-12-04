@@ -9,8 +9,8 @@ namespace Network.Messaging
     public class ConnectMessage:NetworkMessage
     {
         public bool Connected { get; set; }
-        public BroadCastClient BroadCastClient { get; set; }
-        public ConnectMessage(BroadCastClient client)
+        public BroadcastClient BroadCastClient { get; set; }
+        public ConnectMessage(BroadcastClient client)
         {
             this.BroadCastClient = client;
         }

@@ -3,9 +3,9 @@ namespace Network.EventArgs
 {
     public class BroadcastClientConnectedEventArgs: System.EventArgs
     {
-        public BroadCastClient BroadcastClient { private set; get; }
+        public BroadcastClient BroadcastClient { private set; get; }
 
-        public BroadcastClientConnectedEventArgs(BroadCastClient broadCastClient)
+        public BroadcastClientConnectedEventArgs(BroadcastClient broadCastClient)
         {
             this.BroadcastClient = broadCastClient;
         }

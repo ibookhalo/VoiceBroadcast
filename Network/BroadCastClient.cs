@@ -4,11 +4,11 @@
 namespace Network
 {
     [Serializable]
-    public class BroadCastClient
+    public class BroadcastClient
     {
         public string Name { private set; get; }
         public uint? Id { private set; get; }
-        public BroadCastClient(string clientName, uint? clientId)
+        public BroadcastClient(string clientName, uint? clientId)
         {
             this.Name = clientName;
             this.Id = clientId;

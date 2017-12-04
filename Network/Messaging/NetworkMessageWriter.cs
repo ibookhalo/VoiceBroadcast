@@ -20,7 +20,7 @@ namespace  Network.Messaging
         public event WriteCompletedHandler WriteCompleted;
         public event WriteErrorHandler WriteError;
 
-        public bool StopWritingOnError { get; set; }
+        public bool OnErrorStopWritingAndCloseClient { get; set; }
 
         public NetworkMessageWriter(TcpClient tcpClient)
         {
@@ -54,7 +54,7 @@ namespace  Network.Messaging
             {
                 WriteError?.BeginInvoke(this, new NetworkMessageWriterWriteErrorEventArgs(ar.AsyncState as NetworkMessage, TcpClient, ex),null,null);
 
-                if (StopWritingOnError)
+                if (OnErrorStopWritingAndCloseClient)
                 {
                     netStream?.Close();
                     TcpClient?.Close();

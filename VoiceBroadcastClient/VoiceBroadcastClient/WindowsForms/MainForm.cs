@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Network;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,8 +21,9 @@ namespace VoiceBroadcastClient
         private ConfigForm configForm;
         private bool allreadyShown,firstTimeShownTrayIcon;
         private NotifyIcon notifyIconBalloon;
-
         private TcpBroadcastClient client;
+
+        private BroadcastClient broadcastClient;
 
         private System.Diagnostics.Stopwatch stopWatch;
         public MainForm()
@@ -32,7 +34,7 @@ namespace VoiceBroadcastClient
             appTaskbarIcon = new NotifyIcon();
             stopWatch = new System.Diagnostics.Stopwatch();
 
-            appTaskbarIcon.Click += TrayIcon_Click;
+            appTaskbarIcon.MouseClick += TrayIcon_MouseClick;
             Disposed += FormBroadcastClient_Disposed;
 
             appTaskbarIcon.Icon = new Icon(Properties.Resources.appIcon, 40, 40);
@@ -46,26 +48,33 @@ namespace VoiceBroadcastClient
             refreshAppTaskbarIconState(false);
             connectToServer();
         }
-        private void TrayIcon_Click(object sender, EventArgs e)
+
+        private void TrayIcon_MouseClick(object sender, MouseEventArgs e)
         {
-            var connected = client.Connected;
-            refreshAppTaskbarIconState(connected);
-            if (connected)
+            if (e.Button==MouseButtons.Left)
             {
+                if (!client.IsConnected)
+                {
+                    showNotificationBalloon("Voicebroadcast ist nicht mit dem Server verbunden !");
+                    return;
+                }
+
+                refreshAppTaskbarIconState(true);
+                hideForm();
                 showForm();
             }
-            else
-            {
-
-            }
         }
+
         private void showNotificationBalloon(string message)
         {
             if (notifyIconBalloon==null)
             {
                 notifyIconBalloon = new NotifyIcon();
+
+                notifyIconBalloon.BalloonTipClosed += NotifyIconBalloon_DisposeBalloonTip;
+                notifyIconBalloon.BalloonTipClicked += NotifyIconBalloon_DisposeBalloonTip;
+
                 notifyIconBalloon.Icon = Properties.Resources.appIcon;
-                notifyIconBalloon.BalloonTipClicked +=(_ob,_e)=>{ notifyIconBalloon.Visible = false;notifyIconBalloon.Dispose(); };
                 notifyIconBalloon.Visible = true;
                 notifyIconBalloon.ShowBalloonTip(2000, Text, message,ToolTipIcon.Error);
             }
@@ -75,6 +84,12 @@ namespace VoiceBroadcastClient
                 notifyIconBalloon = null;
                 showNotificationBalloon(message);
             }
+        }
+
+        private void NotifyIconBalloon_DisposeBalloonTip(object sender, EventArgs e)
+        {
+            notifyIconBalloon.Visible = false;
+            notifyIconBalloon.Dispose();
         }
 
         private void refreshAppTaskbarIconState(bool connected)
@@ -87,10 +102,10 @@ namespace VoiceBroadcastClient
             try
             {
                 var conf = AppConfiguration.ReadConfig();
-                client.Connect(conf.ServerIP, conf.ServerPort, new Network.BroadCastClient(conf.ClientName, null));
+                client.ClientConnectedEvent += Client_ClientConnectedEvent;
+                client.ClientDisconnectedEvent += Client_ClientDisconnectedEvent;
 
-
-                refreshAppTaskbarIconState(true);
+                client.Connect();
                 //
             }
             catch (Exception ex)
@@ -98,6 +113,19 @@ namespace VoiceBroadcastClient
                 Logger.log.Error(ex);
             }
         }
+
+        private void Client_ClientDisconnectedEvent(object obj, EventArgs e)
+        {
+            refreshAppTaskbarIconState(false);
+        }
+
+        private void Client_ClientConnectedEvent(object obj, ClientConnectedEventArgs e)
+        {
+            broadcastClient = e.BroadcastClient;
+
+            refreshAppTaskbarIconState(true);
+        }
+
         private void openConfig(object sender, EventArgs e)
         {
             if (configForm == null)
@@ -107,6 +135,8 @@ namespace VoiceBroadcastClient
             if (!configForm.Visible)
             {
                 configForm.ShowDialog();
+                configForm.Close();
+                configForm = null;
             }
         }
         private void exit(object sender, EventArgs e)
@@ -132,7 +162,7 @@ namespace VoiceBroadcastClient
             }
             Activate();
         }
-        private void hide()
+        private void hideForm()
         {
             Hide();
             Visible = false; // Hide form window.
@@ -145,22 +175,27 @@ namespace VoiceBroadcastClient
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            hide();
+            hideForm();
         }
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
             if (allreadyShown && Visible)
             {
-                hide();
+                hideForm();
             }
         }
         private void btnRecord_MouseDown(object sender, MouseEventArgs e)
         {
+
             btnRecord.Image = Properties.Resources.Speak_On;
             stopWatch.Start();
             timerDuration.Start();
             lblDuration.Visible = true;
             lblDuration.Text = "00:00:00";
+            
+            // start recording
+
+            
         }
 
         private void btnRecord_MouseUp(object sender, MouseEventArgs e)
@@ -170,24 +205,23 @@ namespace VoiceBroadcastClient
             stopWatch.Reset();
             timerDuration.Stop();
             lblDuration.Visible = false;
+            // stop recording
+
+            // send voiceMessage ...
+            client.SendVoiceMessage(new Network.Messaging.VoiceMessage(broadcastClient, null));
+
         }
 
         private void timerDuration_Tick(object sender, EventArgs e)
         {
             lblDuration.Text = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
         }
-
-        private void btnRecord_Click(object sender, EventArgs e)
-        {
-
-        }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason!=CloseReason.ApplicationExitCall)
             {
                 e.Cancel = true;
-                hide();
-                Logger.log.Info("Closing app ...");
+                hideForm();
             }
         }
     }

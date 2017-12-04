@@ -10,12 +10,16 @@ namespace VoiceBroadcastServer
 {
     class ServerBroadcastClient
     {
-        public Network.BroadCastClient Client { get; private set; }
+        public Network.BroadcastClient Client { get; private set; }
         public TcpClient TcpClient { get; private set; }
-        public ServerBroadcastClient(Network.BroadCastClient client, TcpClient tcpClient)
+        public ServerBroadcastClient(Network.BroadcastClient client, TcpClient tcpClient)
         {
             this.Client = client;
             this.TcpClient = tcpClient;
+        }
+        public override string ToString()
+        {
+            return Client?.ToString();
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Network.EventArgs
 {
-    public abstract class NetworkMessageErrorEventArgs
+    public class NetworkMessageErrorEventArgs:System.EventArgs
     {
         public TcpClient TcpClient { private set; get; }
         public Exception Exception { private set; get; }

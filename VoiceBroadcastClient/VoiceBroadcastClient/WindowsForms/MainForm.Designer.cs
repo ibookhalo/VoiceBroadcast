@@ -58,7 +58,6 @@
             this.btnRecord.Size = new System.Drawing.Size(23, 24);
             this.btnRecord.TabIndex = 1;
             this.btnRecord.UseVisualStyleBackColor = true;
-            this.btnRecord.Click += new System.EventHandler(this.btnRecord_Click);
             this.btnRecord.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnRecord_MouseDown);
             this.btnRecord.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btnRecord_MouseUp);
             // 

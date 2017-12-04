@@ -16,12 +16,12 @@ namespace Network.Messaging
         private NetworkStream netStream;
 
         public delegate void ReadCompletedHandler(object obj, NetworkMessageReaderReadCompletedEventArgs e);
-        public delegate void ReadErrorHandler(object obj, NetworkMessageReaderReadErrorEventArgs e);
+        public delegate void ReadErrorHandler(object obj, NetworkMessageErrorEventArgs e);
 
         public event ReadCompletedHandler ReadCompleted;
         public event ReadErrorHandler ReadError;
 
-        public bool StopReadingOnError { get; set; }
+        public bool OnErrorStopReadingAndCloseClient { get; set; }
 
         public NetworkMessageReader(TcpClient tcpClient)
         {
@@ -53,7 +53,7 @@ namespace Network.Messaging
                 if (netMesasge!=null)
                     ReadCompleted?.BeginInvoke(this, new NetworkMessageReaderReadCompletedEventArgs(netMesasge, TcpClient),null,null);
                 else
-                    ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient,new ArgumentNullException("NetworkMessage is null")),null,null);
+                    ReadError?.BeginInvoke(this, new NetworkMessageErrorEventArgs(TcpClient,new ArgumentNullException("NetworkMessage is null")),null,null);
 
                 if (readLoop)
                 {
@@ -62,9 +62,9 @@ namespace Network.Messaging
             }
             catch (Exception ex)
             {
-                ReadError?.BeginInvoke(this, new NetworkMessageReaderReadErrorEventArgs(TcpClient, ex),null,null);
+                ReadError?.BeginInvoke(this, new NetworkMessageErrorEventArgs(TcpClient, ex),null,null);
 
-                if (StopReadingOnError)
+                if (OnErrorStopReadingAndCloseClient)
                 {
                     netStream?.Close();
                     TcpClient?.Close();
