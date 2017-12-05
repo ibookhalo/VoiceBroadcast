@@ -13,51 +13,33 @@ namespace Network
 
         public delegate void NetworkInterfaceStateChanged(object obj, System.EventArgs e);
         public event NetworkInterfaceStateChanged NetworkInterfaceIsNotUpEvent;
-        public int TimerInterval {get;private set;}
+        public int TimerIntervalInSec { get; private set; }
         private Timer nicStateCheckerTimer;
         private IPAddress IPAddress;
 
-        public NetworkInterfaceStateNotifier(int timerIntervalIn_ms, IPAddress ipAddress)
+        public NetworkInterfaceStateNotifier(int timerIntervalInSec, IPAddress ipAddress)
         {
-            TimerInterval = timerIntervalIn_ms;
+            TimerIntervalInSec = timerIntervalInSec;
             IPAddress = ipAddress;
-            nicStateCheckerTimer = new Timer(adapterStateCheckerTimerCallback, null, timerIntervalIn_ms, timerIntervalIn_ms);
+        }
+
+        public void Start()
+        {
+            nicStateCheckerTimer = new Timer(adapterStateCheckerTimerCallback, null, TimerIntervalInSec * 1000, TimerIntervalInSec * 1000);
+        }
+
+        public void Stop()
+        {
+            nicStateCheckerTimer.Dispose();
+            nicStateCheckerTimer = null;
         }
         private void adapterStateCheckerTimerCallback(object state)
         {
-            var nic = getNetworkAdapterByIP(IPAddress);
-            if (nic != null)
+            if (!NetworkInfoRetriever.IsNetworkAdapterUp(IPAddress))
             {
-                if (nic.OperationalStatus != OperationalStatus.Up)
-                {
-                    // cable unplugged ?
-                    NetworkInterfaceIsNotUpEvent?.BeginInvoke(this, new System.EventArgs(), null, null);    
-                }
-            }
-            else
-            {
-                // nic is disable ?
                 NetworkInterfaceIsNotUpEvent?.BeginInvoke(this, new System.EventArgs(), null, null);
             }
-        }
-        private NetworkInterface getNetworkAdapterByIP(IPAddress ip)
-        {
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                {
-                    foreach (UnicastIPAddressInformation ipInfo in nic.GetIPProperties().UnicastAddresses)
-                    {
-                        if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && ipInfo.Address.Equals(ip))
-                        {
-                            return nic;
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-       
+        }      
     }
 
 }

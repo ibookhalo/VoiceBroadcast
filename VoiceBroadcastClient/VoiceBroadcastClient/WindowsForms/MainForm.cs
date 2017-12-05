@@ -20,19 +20,20 @@ namespace VoiceBroadcastClient
         private NotifyIcon appTaskbarIcon;
         private ConfigForm configForm;
         private bool allreadyShown,firstTimeShownTrayIcon;
-        private NotifyIcon notifyIconBalloon;
         private TcpBroadcastClient client;
 
         private BroadcastClient broadcastClient;
 
-        private System.Diagnostics.Stopwatch stopWatch;
+        private System.Diagnostics.Stopwatch stopWatchSoundRecording;
+        private NAudioWrapper.Recorder soundRecorder;
+
         public MainForm()
         {
             InitializeComponent();
 
             client = new TcpBroadcastClient();
             appTaskbarIcon = new NotifyIcon();
-            stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatchSoundRecording = new System.Diagnostics.Stopwatch();
 
             appTaskbarIcon.MouseClick += TrayIcon_MouseClick;
             Disposed += FormBroadcastClient_Disposed;
@@ -48,16 +49,15 @@ namespace VoiceBroadcastClient
             refreshAppTaskbarIconState(false);
             connectToServer();
         }
-
         private void TrayIcon_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button==MouseButtons.Left)
             {
-                if (!client.IsConnected)
+                /*if (NetworkInterfaceStateNotifier.GetNetworkAdapterByIP( !client.IsConnected)
                 {
-                    showNotificationBalloon("Voicebroadcast ist nicht mit dem Server verbunden !");
+                    showErrorMessageBox("Voicebroadcast ist nicht mit dem Server verbunden !");
                     return;
-                }
+                }*/
 
                 refreshAppTaskbarIconState(true);
                 hideForm();
@@ -65,33 +65,10 @@ namespace VoiceBroadcastClient
             }
         }
 
-        private void showNotificationBalloon(string message)
+        private void showErrorMessageBox(string message)
         {
-            if (notifyIconBalloon==null)
-            {
-                notifyIconBalloon = new NotifyIcon();
-
-                notifyIconBalloon.BalloonTipClosed += NotifyIconBalloon_DisposeBalloonTip;
-                notifyIconBalloon.BalloonTipClicked += NotifyIconBalloon_DisposeBalloonTip;
-
-                notifyIconBalloon.Icon = Properties.Resources.appIcon;
-                notifyIconBalloon.Visible = true;
-                notifyIconBalloon.ShowBalloonTip(2000, Text, message,ToolTipIcon.Error);
-            }
-            else
-            {
-                notifyIconBalloon.Dispose();
-                notifyIconBalloon = null;
-                showNotificationBalloon(message);
-            }
+           
         }
-
-        private void NotifyIconBalloon_DisposeBalloonTip(object sender, EventArgs e)
-        {
-            notifyIconBalloon.Visible = false;
-            notifyIconBalloon.Dispose();
-        }
-
         private void refreshAppTaskbarIconState(bool connected)
         {
             appTaskbarIcon.Icon = connected ? Properties.Resources.appIconOn : Properties.Resources.appIconOff;
@@ -188,7 +165,7 @@ namespace VoiceBroadcastClient
         {
 
             btnRecord.Image = Properties.Resources.Speak_On;
-            stopWatch.Start();
+            stopWatchSoundRecording.Start();
             timerDuration.Start();
             lblDuration.Visible = true;
             lblDuration.Text = "00:00:00";
@@ -201,8 +178,8 @@ namespace VoiceBroadcastClient
         private void btnRecord_MouseUp(object sender, MouseEventArgs e)
         {
             btnRecord.Image = Properties.Resources.Speak_Off;
-            stopWatch.Stop();
-            stopWatch.Reset();
+            stopWatchSoundRecording.Stop();
+            stopWatchSoundRecording.Reset();
             timerDuration.Stop();
             lblDuration.Visible = false;
             // stop recording
@@ -212,9 +189,26 @@ namespace VoiceBroadcastClient
 
         }
 
-        private void timerDuration_Tick(object sender, EventArgs e)
+        private void startRecording()
         {
-            lblDuration.Text = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
+
+        }
+
+        private void stopRecording()
+        {
+            soundRecorder.StopRecording();
+            // get data in 
+        }
+
+        private void timerDuration_Tick(object sender, EventArgs e)
+        { 
+            lblDuration.Text = stopWatchSoundRecording.Elapsed.ToString(@"hh\:mm\:ss");
+
+            if (stopWatchSoundRecording.Elapsed.TotalSeconds >= 30) // max 30 sec recording
+            {
+                stopWatchSoundRecording.Reset();
+                stopRecording();
+            }
         }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {

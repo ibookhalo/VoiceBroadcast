@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -85,7 +86,7 @@ namespace VoiceBroadcastServer
             }
             if (nicNotifier==null)
             {
-                nicNotifier = new NetworkInterfaceStateNotifier(5000, localEndPoint.Address);
+                nicNotifier = new NetworkInterfaceStateNotifier(5, localEndPoint.Address);
                 nicNotifier.NetworkInterfaceIsNotUpEvent += NicNotifier_NetworkInterfaceIsNotUpEvent;
             }
 

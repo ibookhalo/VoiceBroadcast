@@ -52,6 +52,7 @@
     <Compile Include="Messaging\NetworkMessageWriter.cs" />
     <Compile Include="EventArgs\NetworkMessageWriterWriteCompletedEventArgs.cs" />
     <Compile Include="Messaging\VoiceMessage.cs" />
+    <Compile Include="NetworkInfoRetriever.cs" />
     <Compile Include="NetworkInterfaceStateNotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -20,50 +20,78 @@ namespace VoiceBroadcastClient.Classes
         public delegate void ClientDisonnected(object obj, EventArgs e);
 
         public event ClientConnected ClientConnectedEvent;
+
+        private bool isClientDisconnectedEventAlreadyFired; /* will be set to 'false' every time the client (re)connect successfully
+                                                               will be set to 'true' every time after firing ClientDisconnectedEvent event*/
+
         public event ClientDisonnected ClientDisconnectedEvent;
 
         public bool IsConnected { get; private set; }
         private object isConnectedLocker = new object();
-       
-        private System.Threading.Timer autoReconnectTimer;
-        private const int autoReconnectTimerInterval = 5000;
         
+        private bool isConnecting;
+        private object isConnectingLocker = new object();
+
+        private System.Threading.Timer autoReconnectTimer;
+        private const int autoReconnectTimerIntervalInMs = 5000;
+
+        private IPAddress localIPAddress;
+
         public TcpBroadcastClient()
         {
         }
 
         private void autoReconnectTimerCallback(object state)
         {
+            bool isConnected = false;
+            bool isConnecting = false;
+
             lock (isConnectedLocker)
-            {// todo
-                if (!IsConnected)
-                {
-                    try
-                    {
-                        Logger.log.Warn("Reconnecting ...");
-                        // reconnect
-                        tcpClient?.Close();
-                        Connect();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.log.Error(ex);
-                    }
-                }
+            {
+                isConnected = this.IsConnected;    
+            }
+            lock (isConnectingLocker)
+            {
+                isConnecting = this.isConnecting;
+            }
+
+            bool isNicUp= NetworkInfoRetriever.IsNetworkAdapterUp(localIPAddress);
+            if (!isNicUp)
+            {
+                tcpClient.Close();
+                handleClientDisconnected();
+            }
+
+            if (isNicUp && !isConnecting && !isConnected)
+            {
+                // reconnect ...
+                Logger.log.Warn("reconnecting ...");
+                Connect();
             }
         }
 
-        private void isConnected(bool isConnected)
+        private void setIsConnected(bool isConnected)
         {
             lock (isConnectedLocker)
             {
                 IsConnected = isConnected;
             }
         }
+        private void setIsConnecting(bool isConnecting)
+        {
+            lock (isConnectingLocker)
+            {
+                this.isConnecting = isConnecting;
+            }
+        }
         private void handleClientDisconnected()
         {
-            isConnected(false);
-            ClientDisconnectedEvent?.BeginInvoke(this, new EventArgs(), null, null);
+            setIsConnected(false);
+            if (!isClientDisconnectedEventAlreadyFired)
+            {
+                ClientDisconnectedEvent?.BeginInvoke(this, new EventArgs(), null, null);
+                isClientDisconnectedEventAlreadyFired = true;
+            }
         }
         private void MessageReader_ReadError(object obj, Network.EventArgs.NetworkMessageErrorEventArgs e)
         {
@@ -97,7 +125,8 @@ namespace VoiceBroadcastClient.Classes
                 && ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString().Equals(AppConfiguration.ReadConfig().ServerIP)
                 && connectMessage.BroadCastClient.Name.Equals(AppConfiguration.ReadConfig().ClientName))
             {
-                isConnected(true);
+                setIsConnected(true);
+                isClientDisconnectedEventAlreadyFired = false;
                 ClientConnectedEvent?.BeginInvoke(this,new ClientConnectedEventArgs(connectMessage.BroadCastClient), null, null);
             }
             else
@@ -106,50 +135,10 @@ namespace VoiceBroadcastClient.Classes
                 tcpClient.Close();
             }
         }
-        public bool Connected
-        {
-            get
-            {
-                try
-                {
-                    if (tcpClient.Client != null && tcpClient.Client.Connected)
-                    {
-                        // Detect if client disconnected
-                        if (tcpClient.Client.Poll(0, SelectMode.SelectRead))
-                        {
-                            byte[] buff = new byte[1];
-                            if (tcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
-                            {
-                                // Client disconnected
-                                return false;
-                            }
-                            else
-                            {
-                                return true;
-                            }
-                        }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
-
+        
         // TODO Threadsicher???!!!!
         public void Connect()
         {
-            if (autoReconnectTimer == null)
-            {
-                autoReconnectTimer = new System.Threading.Timer(autoReconnectTimerCallback, null, autoReconnectTimerInterval+5000, autoReconnectTimerInterval);
-            }
-
             tcpClient = new TcpClient();
             messageReader = new NetworkMessageReader(tcpClient);
             messageWriter = new NetworkMessageWriter(tcpClient);
@@ -161,15 +150,37 @@ namespace VoiceBroadcastClient.Classes
             messageReader.ReadError += MessageReader_ReadError;
             messageWriter.WriteError += MessageWriter_WriteError;
 
-            var config = AppConfiguration.ReadConfig();
+            setIsConnected(false);
+            setIsConnecting(true);
 
-            lock (isConnectedLocker)
+            try
             {
+                var config = AppConfiguration.ReadConfig();
+
                 tcpClient.Connect(config.ServerIP, config.ServerPort);
+
+                if (autoReconnectTimer == null)
+                {
+                    autoReconnectTimer = new System.Threading.Timer(autoReconnectTimerCallback, null, autoReconnectTimerIntervalInMs, autoReconnectTimerIntervalInMs);
+                }
+                localIPAddress = (tcpClient.Client.LocalEndPoint as IPEndPoint).Address;
+
+                sendMessage(new ConnectMessage(new BroadcastClient(config.ClientName, null)));
+                messageReader.ReadAsync(true);
+            }
+            catch (Exception ex)
+            {
+                tcpClient.Close();
+
+                setIsConnecting(false);
+                setIsConnected(false);
+
+                throw ex;
             }
 
-            sendMessage(new ConnectMessage(new BroadcastClient(config.ClientName,null)));
-            messageReader.ReadAsync(true);
+            setIsConnecting(false);
+            setIsConnected(true);
+
         }
         private void sendMessage(NetworkMessage message)
         {
