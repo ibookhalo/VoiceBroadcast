@@ -52,8 +52,8 @@
     <ApplicationIcon>appIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\..\VoiceBroadcastServer\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    <Reference Include="log4net">
+      <HintPath>..\..\ExternalLibs\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -142,7 +142,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\NAudioWrapper\NAudioWrapper\NAudioWrapper\NAudioWrapper.csproj">
+    <ProjectReference Include="..\..\NAudioWrapper\NAudioWrapper\NAudioWrapper\NAudioWrapper.csproj">
       <Project>{f4dc1532-8728-41fc-84a8-38ef0e0f7e07}</Project>
       <Name>NAudioWrapper</Name>
     </ProjectReference>
