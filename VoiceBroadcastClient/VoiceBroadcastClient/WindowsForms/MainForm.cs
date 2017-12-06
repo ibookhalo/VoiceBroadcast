@@ -270,7 +270,7 @@ namespace VoiceBroadcastClient
         }
         private void startRecording()
         {
-            btnRecord.Image = Properties.Resources.Speak_On;
+            btnRecord.Image = Properties.Resources.Speak_Off;
 
             soundRecorder = new NAudioWrapper.Recorder(AppConfiguration.ReadConfig().CaptureDevice.Id);
             soundRecorder.RecordingStoppedEvent += SoundRecorder_RecordingStoppedEvent;
@@ -280,7 +280,7 @@ namespace VoiceBroadcastClient
         }
         private void stopRecording()
         {
-            btnRecord.Image = Properties.Resources.Speak_Off;
+            btnRecord.Image = Properties.Resources.Speak_On;
             stopTimerRecordingDuration();
 
             soundRecorder?.StopRecording(); // data are in callback method ....
