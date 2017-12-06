@@ -50,18 +50,20 @@
             // tbServerIP
             // 
             this.tbServerIP.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbServerIP.Location = new System.Drawing.Point(130, 87);
+            this.tbServerIP.Location = new System.Drawing.Point(87, 57);
+            this.tbServerIP.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tbServerIP.Name = "tbServerIP";
-            this.tbServerIP.Size = new System.Drawing.Size(275, 33);
+            this.tbServerIP.Size = new System.Drawing.Size(185, 24);
             this.tbServerIP.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(17, 90);
+            this.label1.Location = new System.Drawing.Point(11, 58);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(87, 26);
+            this.label1.Size = new System.Drawing.Size(59, 20);
             this.label1.TabIndex = 1;
             this.label1.Text = "Server-IP";
             // 
@@ -69,16 +71,18 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(17, 134);
+            this.label2.Location = new System.Drawing.Point(11, 87);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(104, 26);
+            this.label2.Size = new System.Drawing.Size(70, 20);
             this.label2.TabIndex = 2;
             this.label2.Text = "Server-Port";
             // 
             // nudServerPort
             // 
             this.nudServerPort.Font = new System.Drawing.Font("Arial Narrow", 11F);
-            this.nudServerPort.Location = new System.Drawing.Point(130, 134);
+            this.nudServerPort.Location = new System.Drawing.Point(87, 87);
+            this.nudServerPort.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.nudServerPort.Maximum = new decimal(new int[] {
             9999,
             0,
@@ -90,7 +94,7 @@
             0,
             0});
             this.nudServerPort.Name = "nudServerPort";
-            this.nudServerPort.Size = new System.Drawing.Size(275, 33);
+            this.nudServerPort.Size = new System.Drawing.Size(183, 24);
             this.nudServerPort.TabIndex = 3;
             this.nudServerPort.Value = new decimal(new int[] {
             6666,
@@ -101,9 +105,10 @@
             // ok
             // 
             this.ok.Font = new System.Drawing.Font("Arial", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ok.Location = new System.Drawing.Point(113, 405);
+            this.ok.Location = new System.Drawing.Point(75, 263);
+            this.ok.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.ok.Name = "ok";
-            this.ok.Size = new System.Drawing.Size(213, 48);
+            this.ok.Size = new System.Drawing.Size(142, 31);
             this.ok.TabIndex = 4;
             this.ok.Text = "Übernehmen";
             this.ok.UseVisualStyleBackColor = true;
@@ -113,18 +118,20 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(18, 45);
+            this.label3.Location = new System.Drawing.Point(12, 29);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(103, 26);
+            this.label3.Size = new System.Drawing.Size(73, 20);
             this.label3.TabIndex = 6;
             this.label3.Text = "Clientname";
             // 
             // tbClientName
             // 
             this.tbClientName.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbClientName.Location = new System.Drawing.Point(131, 42);
+            this.tbClientName.Location = new System.Drawing.Point(87, 27);
+            this.tbClientName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tbClientName.Name = "tbClientName";
-            this.tbClientName.Size = new System.Drawing.Size(275, 33);
+            this.tbClientName.Size = new System.Drawing.Size(185, 24);
             this.tbClientName.TabIndex = 1;
             // 
             // groupBox1
@@ -134,9 +141,11 @@
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.groupBox1.Location = new System.Drawing.Point(12, 221);
+            this.groupBox1.Location = new System.Drawing.Point(8, 144);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(425, 158);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Size = new System.Drawing.Size(283, 103);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Audio";
@@ -146,9 +155,10 @@
             this.cbOutput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbOutput.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.cbOutput.FormattingEnabled = true;
-            this.cbOutput.Location = new System.Drawing.Point(127, 91);
+            this.cbOutput.Location = new System.Drawing.Point(85, 59);
+            this.cbOutput.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cbOutput.Name = "cbOutput";
-            this.cbOutput.Size = new System.Drawing.Size(275, 34);
+            this.cbOutput.Size = new System.Drawing.Size(185, 28);
             this.cbOutput.TabIndex = 14;
             // 
             // cbInput
@@ -156,18 +166,20 @@
             this.cbInput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbInput.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.cbInput.FormattingEnabled = true;
-            this.cbInput.Location = new System.Drawing.Point(127, 41);
+            this.cbInput.Location = new System.Drawing.Point(85, 27);
+            this.cbInput.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cbInput.Name = "cbInput";
-            this.cbInput.Size = new System.Drawing.Size(275, 34);
+            this.cbInput.Size = new System.Drawing.Size(185, 28);
             this.cbInput.TabIndex = 13;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(14, 91);
+            this.label5.Location = new System.Drawing.Point(9, 59);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(82, 26);
+            this.label5.Size = new System.Drawing.Size(57, 20);
             this.label5.TabIndex = 12;
             this.label5.Text = "Ausgang";
             // 
@@ -175,9 +187,10 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(15, 39);
+            this.label4.Location = new System.Drawing.Point(10, 25);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(78, 26);
+            this.label4.Size = new System.Drawing.Size(55, 20);
             this.label4.TabIndex = 11;
             this.label4.Text = "Eingang";
             // 
@@ -190,23 +203,26 @@
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.nudServerPort);
             this.groupBox2.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.groupBox2.Location = new System.Drawing.Point(12, 12);
+            this.groupBox2.Location = new System.Drawing.Point(8, 8);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(425, 192);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Size = new System.Drawing.Size(283, 125);
             this.groupBox2.TabIndex = 15;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Server";
             // 
             // ConfigForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(449, 461);
+            this.ClientSize = new System.Drawing.Size(299, 300);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.ok);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.MaximizeBox = false;
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

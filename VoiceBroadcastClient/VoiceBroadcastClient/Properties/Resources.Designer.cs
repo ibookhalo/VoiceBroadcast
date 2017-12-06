@@ -93,9 +93,9 @@ namespace VoiceBroadcastClient.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Speak_Off {
+        internal static System.Drawing.Bitmap Speak_On {
             get {
-                object obj = ResourceManager.GetObject("Speak_Off", resourceCulture);
+                object obj = ResourceManager.GetObject("Speak_On", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace VoiceBroadcastClient.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Speak_On {
+        internal static System.Drawing.Bitmap Speak_Off {
             get {
-                object obj = ResourceManager.GetObject("Speak_On", resourceCulture);
+                object obj = ResourceManager.GetObject("Speak_Off", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

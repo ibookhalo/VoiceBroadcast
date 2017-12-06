@@ -66,12 +66,10 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="WinSound">
-      <HintPath>.\WinSound.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\ClientConnectedEventArgs.cs" />
+    <Compile Include="Classes\ClientVoiceMessageReceivedEventArgs.cs" />
     <Compile Include="Classes\TcpBroadCastClient.cs" />
     <Compile Include="WindowsForms\ConfigForm.cs">
       <SubType>Form</SubType>

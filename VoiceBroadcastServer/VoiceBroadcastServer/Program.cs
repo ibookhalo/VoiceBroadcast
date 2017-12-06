@@ -30,6 +30,7 @@ namespace VoiceBroadcastServer
             {
                 Logger.log.Error("Args error !");
             }
+            Console.ReadLine();
         }
     }
 }

@@ -23,41 +23,6 @@ namespace VoiceBroadcastServer
             clients = new List<ServerBroadcastClient>();
             
         }
-        private bool Connected
-        {
-            get
-            {
-                try
-                {
-                    if (tcpListener.Server != null)
-                    {
-                        // Detect if client disconnected
-                        if (tcpListener.Server.Poll(1, SelectMode.SelectRead) && tcpListener.Server.Available == 0)
-                        {
-                            byte[] buff = new byte[1];
-                            if (tcpListener.Server.Receive(buff, SocketFlags.Peek) == 0)
-                            {
-                                // Client disconnected
-                                return false;
-                            }
-                            else
-                            {
-                                return true;
-                            }
-                        }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
         public void Init(string ip, int port)
         {
             tcpListener = new TcpListener(localEndPoint = new System.Net.IPEndPoint(IPAddress.Parse(ip), port));

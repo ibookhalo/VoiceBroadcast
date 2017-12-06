@@ -27,18 +27,21 @@ namespace Network
             }
             return true;
         }
-
+        
         private static NetworkInterface GetNetworkAdapterByIP(IPAddress ip)
         {
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            if (ip!=null)
             {
-                if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
                 {
-                    foreach (UnicastIPAddressInformation ipInfo in nic.GetIPProperties().UnicastAddresses)
+                    if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                     {
-                        if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && ipInfo.Address.Equals(ip))
+                        foreach (UnicastIPAddressInformation ipInfo in nic.GetIPProperties().UnicastAddresses)
                         {
-                            return nic;
+                            if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && ipInfo.Address.Equals(ip))
+                            {
+                                return nic;
+                            }
                         }
                     }
                 }

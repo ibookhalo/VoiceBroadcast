@@ -32,8 +32,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.label1 = new System.Windows.Forms.Label();
             this.btnRecord = new System.Windows.Forms.Button();
-            this.lblDuration = new System.Windows.Forms.Label();
-            this.timerDuration = new System.Windows.Forms.Timer(this.components);
+            this.lblSoundRecordingDuration = new System.Windows.Forms.Label();
+            this.timerSoundRecordingDuration = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // label1
@@ -51,9 +51,9 @@
             // btnRecord
             // 
             this.btnRecord.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRecord.Image = ((System.Drawing.Image)(resources.GetObject("btnRecord.Image")));
+            this.btnRecord.Image = global::VoiceBroadcastClient.Properties.Resources.Speak_On;
             this.btnRecord.Location = new System.Drawing.Point(39, 31);
-            this.btnRecord.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnRecord.Margin = new System.Windows.Forms.Padding(2);
             this.btnRecord.Name = "btnRecord";
             this.btnRecord.Size = new System.Drawing.Size(23, 24);
             this.btnRecord.TabIndex = 1;
@@ -61,34 +61,35 @@
             this.btnRecord.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnRecord_MouseDown);
             this.btnRecord.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btnRecord_MouseUp);
             // 
-            // lblDuration
+            // lblSoundRecordingDuration
             // 
-            this.lblDuration.AutoSize = true;
-            this.lblDuration.Location = new System.Drawing.Point(27, 63);
-            this.lblDuration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblDuration.Name = "lblDuration";
-            this.lblDuration.Size = new System.Drawing.Size(49, 13);
-            this.lblDuration.TabIndex = 2;
-            this.lblDuration.Text = "00:00:00";
-            this.lblDuration.Visible = false;
+            this.lblSoundRecordingDuration.AutoSize = true;
+            this.lblSoundRecordingDuration.Location = new System.Drawing.Point(27, 63);
+            this.lblSoundRecordingDuration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblSoundRecordingDuration.Name = "lblSoundRecordingDuration";
+            this.lblSoundRecordingDuration.Size = new System.Drawing.Size(49, 13);
+            this.lblSoundRecordingDuration.TabIndex = 2;
+            this.lblSoundRecordingDuration.Text = "00:00:00";
+            this.lblSoundRecordingDuration.Visible = false;
             // 
-            // timerDuration
+            // timerSoundRecordingDuration
             // 
-            this.timerDuration.Interval = 1000;
-            this.timerDuration.Tick += new System.EventHandler(this.timerDuration_Tick);
+            this.timerSoundRecordingDuration.Interval = 1000;
+            this.timerSoundRecordingDuration.Tick += new System.EventHandler(this.timerDuration_Tick);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(103, 83);
-            this.Controls.Add(this.lblDuration);
+            this.Controls.Add(this.lblSoundRecordingDuration);
             this.Controls.Add(this.btnRecord);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "VoiceBroadcastClient";
             this.TopMost = true;
@@ -105,8 +106,8 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnRecord;
-        private System.Windows.Forms.Label lblDuration;
-        private System.Windows.Forms.Timer timerDuration;
+        private System.Windows.Forms.Label lblSoundRecordingDuration;
+        private System.Windows.Forms.Timer timerSoundRecordingDuration;
     }
 }
 
