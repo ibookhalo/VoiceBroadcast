@@ -37,7 +37,7 @@ namespace VoiceBroadcastClient
             client.ClientConnectedEvent += Client_ClientConnectedEvent;
             client.ClientDisconnectedEvent += Client_ClientDisconnectedEvent;
 
-            appTaskbarIcon = new NotifyIcon();         
+            appTaskbarIcon = new NotifyIcon();
 
             appTaskbarIcon.MouseClick += TrayIcon_MouseClick;
             Disposed += FormBroadcastClient_Disposed;
@@ -68,7 +68,7 @@ namespace VoiceBroadcastClient
         }
         private void disposeVoiceMessageReceivedBallonTip()
         {
-            if (voiceMessageReceivedBallonTip!=null)
+            if (voiceMessageReceivedBallonTip != null)
             {
                 voiceMessageReceivedBallonTip.Visible = false;
                 voiceMessageReceivedBallonTip.Dispose();
@@ -80,13 +80,14 @@ namespace VoiceBroadcastClient
         }
         private void Client_ClientVoiceMessageReceivedEvent(object obj, ClientVoiceMessageReceivedEventArgs e)
         {
-            executeCodeOnUIThread(() => {
+            executeCodeOnUIThread(() =>
+            {
                 showVoiceMessageReceivedBallonTip(e.VoiceMessage);
                 var conf = AppConfiguration.ReadConfig();
 
                 if (conf.RenderDevice.Id >= 0)
                 {
-                    if (soundPlayer!=null)
+                    if (soundPlayer != null)
                     {
                         // todo warte schlange !!
                     }
@@ -96,18 +97,17 @@ namespace VoiceBroadcastClient
                 }
                 else
                 {
-                    executeCodeOnUIThread(() => {
+                    executeCodeOnUIThread(() =>
+                    {
                         MessageBoxManager.ShowMessageBoxError("Fehler beim Abspielen der Broadcast-Nachricht, da kein Ausgabegerät gefunden werden konnte.");
                     });
                 }
             });
         }
-
         private void soundPlayer_PlaybackStopped(object sender, EventArgs e)
         {
             soundPlayer.Stop();
         }
-
         private void TrayIcon_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -115,6 +115,10 @@ namespace VoiceBroadcastClient
                 if (!client.IsConnected)
                 {
                     MessageBoxManager.ShowMessageBoxError("Voicebroadcast hat keine Verbindung zum Server!");
+                }
+                else if (AppConfiguration.ReadConfig().CaptureDevice.Id <=-1)
+                {
+                    MessageBoxManager.ShowMessageBoxError("Voicebroadcast konnte kein Aufnamegerät (Mikrofon) finden!.\nBitte überprüfen Sie die Einstellungen.");
                 }
                 else
                 {
@@ -146,7 +150,8 @@ namespace VoiceBroadcastClient
             {
                 stopRecording();
 
-                executeCodeOnUIThread(() => {
+                executeCodeOnUIThread(() =>
+                {
                     setAppTaskbarIconState(false);
                     hideForm();
                 });
@@ -156,12 +161,12 @@ namespace VoiceBroadcastClient
                 Logger.log.Error(ex);
             }
         }
-
         private void Client_ClientConnectedEvent(object obj, ClientConnectedEventArgs e)
         {
             broadcastClient = e.BroadcastClient;
 
-            executeCodeOnUIThread(()=> {
+            executeCodeOnUIThread(() =>
+            {
                 setAppTaskbarIconState(true);
             });
         }
@@ -243,7 +248,8 @@ namespace VoiceBroadcastClient
             }
             catch (Exception ex)
             {
-                executeCodeOnUIThread(() =>{
+                executeCodeOnUIThread(() =>
+                {
                     MessageBoxManager.ShowMessageBoxError("Fehler bei der Aufnahme.\n\n\n" + ex.StackTrace);
                 });
             }
@@ -256,14 +262,15 @@ namespace VoiceBroadcastClient
             }
             catch (Exception ex)
             {
-                executeCodeOnUIThread(() => {
+                executeCodeOnUIThread(() =>
+                {
                     MessageBoxManager.ShowMessageBoxError("Fehler bei der Aufnahme.\n\n\n" + ex.StackTrace);
                 });
             }
         }
         private void startRecording()
         {
-            btnRecord.Image = Properties.Resources.Speak_Off;
+            btnRecord.Image = Properties.Resources.Speak_On;
 
             soundRecorder = new NAudioWrapper.Recorder(AppConfiguration.ReadConfig().CaptureDevice.Id);
             soundRecorder.RecordingStoppedEvent += SoundRecorder_RecordingStoppedEvent;
@@ -273,13 +280,10 @@ namespace VoiceBroadcastClient
         }
         private void stopRecording()
         {
-            btnRecord.Image = Properties.Resources.Speak_On;
+            btnRecord.Image = Properties.Resources.Speak_Off;
             stopTimerRecordingDuration();
 
-            if (soundRecorder!=null)
-            {
-                soundRecorder.StopRecording(); // data are in callback method ....
-            }
+            soundRecorder?.StopRecording(); // data are in callback method ....
         }
         private void SoundRecorder_RecordingStoppedEvent(object obj, NAudioWrapper.RecordingStoppedEventArgs e)
         {
@@ -290,8 +294,9 @@ namespace VoiceBroadcastClient
             }
             catch (Exception ex)
             {
-                executeCodeOnUIThread(() => {
-                    MessageBoxManager.ShowMessageBoxError("Fehler beim übertragen der Broadcast-Nachricht.\n\n\n"+ex.StackTrace);
+                executeCodeOnUIThread(() =>
+                {
+                    MessageBoxManager.ShowMessageBoxError("Fehler beim übertragen der Broadcast-Nachricht.\n\n\n" + ex.StackTrace);
                 });
             }
             finally
@@ -327,7 +332,8 @@ namespace VoiceBroadcastClient
             timerSoundRecordingDuration.Stop();
             timerRecordingSec = 0;
 
-            executeCodeOnUIThread(() => {
+            executeCodeOnUIThread(() =>
+            {
                 lblSoundRecordingDuration.Text = "00:00:00";
                 lblSoundRecordingDuration.Visible = false;
             });
@@ -336,7 +342,8 @@ namespace VoiceBroadcastClient
         {
             timerSoundRecordingDuration.Start();
 
-            executeCodeOnUIThread(() => {
+            executeCodeOnUIThread(() =>
+            {
                 lblSoundRecordingDuration.Visible = true;
             });
         }

@@ -21,7 +21,7 @@ namespace VoiceBroadcastServer
         public Server()
         {
             clients = new List<ServerBroadcastClient>();
-            
+
         }
         public void Init(string ip, int port)
         {
@@ -49,7 +49,7 @@ namespace VoiceBroadcastServer
             {
                 tcpListener.Start();
             }
-            if (nicNotifier==null)
+            if (nicNotifier == null)
             {
                 nicNotifier = new NetworkInterfaceStateNotifier(5, localEndPoint.Address);
                 nicNotifier.NetworkInterfaceIsNotUpEvent += NicNotifier_NetworkInterfaceIsNotUpEvent;
@@ -93,7 +93,7 @@ namespace VoiceBroadcastServer
             }
         }
 
-        private void removeClientFromListByTcpClient(TcpClient tcpClient,bool closeClient=false)
+        private void removeClientFromListByTcpClient(TcpClient tcpClient, bool closeClient = false)
         {
             if (closeClient)
             {
@@ -105,18 +105,18 @@ namespace VoiceBroadcastServer
                 clients.RemoveAll(client => client.TcpClient.Equals(tcpClient));
             }
         }
-        private void removeClientsFromListByTcpClients(List<TcpClient> tcpClients,bool closeClients=false)
+        private void removeClientsFromListByTcpClients(List<TcpClient> tcpClients, bool closeClients = false)
         {
-            tcpClients.ForEach(client => removeClientFromListByTcpClient(client,closeClients));
+            tcpClients.ForEach(client => removeClientFromListByTcpClient(client, closeClients));
         }
         private void MessageReader_ReadError(object obj, Network.EventArgs.NetworkMessageErrorEventArgs e)
         {
             Logger.log.Info($"Read error: {getServerBroadcastClientByTcpClient(e.TcpClient)?.Client}");
-            removeClientFromListByTcpClient(e.TcpClient,true);
+            removeClientFromListByTcpClient(e.TcpClient, true);
         }
         private void MessageWriter_WriteError(object obj, Network.EventArgs.NetworkMessageWriterWriteErrorEventArgs e)
         {
-            removeClientFromListByTcpClient(e.TcpClient,true);
+            removeClientFromListByTcpClient(e.TcpClient, true);
         }
         private void MessageReader_ReadCompleted(object obj, Network.EventArgs.NetworkMessageReaderReadCompletedEventArgs e)
         {
@@ -131,12 +131,12 @@ namespace VoiceBroadcastServer
                     handleVoiceMessage(e.NetworkMessage as VoiceMessage, e.TcpClient, obj as NetworkMessageReader);
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Logger.log.Error(ex);
             }
         }
-        private bool existsClientInClientListByTcpClientAndId(TcpClient tcpClient,uint clientID)
+        private bool existsClientInClientListByTcpClientAndId(TcpClient tcpClient, uint clientID)
         {
             return clients.Exists(client => client.Client.Id.Value.Equals(clientID) && client.TcpClient.Equals(tcpClient));
         }
@@ -147,7 +147,7 @@ namespace VoiceBroadcastServer
         }
         private void handleVoiceMessage(VoiceMessage voiceMessage, TcpClient sender, NetworkMessageReader networkMessageReader)
         {
-            if (voiceMessage.Sender.Id.HasValue && existsClientInClientListByTcpClientAndId(sender,voiceMessage.Sender.Id.Value))
+            if (voiceMessage.Sender.Id.HasValue && existsClientInClientListByTcpClientAndId(sender, voiceMessage.Sender.Id.Value))
             {
                 Logger.log.Info($"Voicemessage received from {getServerBroadcastClientByTcpClient(sender)}");
 
@@ -166,7 +166,7 @@ namespace VoiceBroadcastServer
                     {
                         // connection error? client is offline? 
                         Logger.log.Error(ex);
-                        clientsToRemove.Add(client.TcpClient); 
+                        clientsToRemove.Add(client.TcpClient);
                     }
                 }
 
@@ -177,14 +177,14 @@ namespace VoiceBroadcastServer
         {
             try
             {
-                if (connectMessage.BroadCastClient==null)
+                if (connectMessage.BroadCastClient == null)
                 {
                     // close
                     sender.Close();
                     return;
                 }
 
-                if (connectMessage.BroadCastClient.Name!=null && connectMessage.BroadCastClient.Name.Length>2)
+                if (connectMessage.BroadCastClient.Name != null && connectMessage.BroadCastClient.Name.Length > 2)
                 {
                     var newClient = new BroadcastClient(connectMessage.BroadCastClient.Name, ++lastClientID);
                     lock (clients)
@@ -216,4 +216,4 @@ namespace VoiceBroadcastServer
         }
 
     }
- }
+}
