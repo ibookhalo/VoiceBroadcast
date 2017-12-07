@@ -142,7 +142,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\NAudioWrapper\NAudioWrapper\NAudioWrapper\NAudioWrapper.csproj">
+    <ProjectReference Include="..\..\..\NAudioWrapper\NAudioWrapper\NAudioWrapper\NAudioWrapper.csproj">
       <Project>{f4dc1532-8728-41fc-84a8-38ef0e0f7e07}</Project>
       <Name>NAudioWrapper</Name>
     </ProjectReference>

@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceBroadcastClient", "VoiceBroadcastClient\VoiceBroadcastClient.csproj", "{902BFEF9-A5E9-4C84-83A7-8141EBBAE3BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network", "..\Network\Network.csproj", "{2CA9EB81-DFAF-4DD6-935C-29A83C085E85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudioWrapper", "..\NAudioWrapper\NAudioWrapper\NAudioWrapper\NAudioWrapper.csproj", "{F4DC1532-8728-41FC-84A8-38EF0E0F7E07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudioWrapper", "..\..\NAudioWrapper\NAudioWrapper\NAudioWrapper\NAudioWrapper.csproj", "{F4DC1532-8728-41FC-84A8-38EF0E0F7E07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

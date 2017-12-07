@@ -141,12 +141,10 @@ namespace VoiceBroadcastClient.Classes
                 Logger.log.Warn(ex);
             }
         }
-
         private void handleVoiceMessage(VoiceMessage voiceMessage, TcpClient tcpClient)
         {
             ClientVoiceMessageReceivedEvent?.BeginInvoke(this,new ClientVoiceMessageReceivedEventArgs(voiceMessage), null, null);
         }
-
         private void handleConnectMessage(ConnectMessage connectMessage, TcpClient tcpClient)
         {
             if (connectMessage.Connected 
@@ -165,7 +163,6 @@ namespace VoiceBroadcastClient.Classes
                 tcpClient.Close();
             }
         }
-        
         // TODO Threadsicher???!!!!
         public void Connect()
         {

@@ -21,11 +21,10 @@ namespace VoiceBroadcastServer
         public Server()
         {
             clients = new List<ServerBroadcastClient>();
-
         }
         public void Init(string ip, int port)
         {
-            tcpListener = new TcpListener(localEndPoint = new System.Net.IPEndPoint(IPAddress.Parse(ip), port));
+            tcpListener = new TcpListener(localEndPoint = new IPEndPoint(IPAddress.Parse(ip), port));
         }
         private bool restartTcpListener()
         {
@@ -53,6 +52,7 @@ namespace VoiceBroadcastServer
             {
                 nicNotifier = new NetworkInterfaceStateNotifier(5, localEndPoint.Address);
                 nicNotifier.NetworkInterfaceIsNotUpEvent += NicNotifier_NetworkInterfaceIsNotUpEvent;
+                nicNotifier.Start();
             }
 
             while (true)

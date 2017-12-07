@@ -1,4 +1,5 @@
-﻿using Network;
+﻿using NAudioWrapper;
+using Network;
 using Network.Messaging;
 using System;
 using System.Collections.Generic;
@@ -25,12 +26,19 @@ namespace VoiceBroadcastClient
         private BroadcastClient broadcastClient;
         private int timerRecordingSec;
 
-        private NAudioWrapper.Recorder soundRecorder;
-        private NAudioWrapper.Player soundPlayer;
+        private SoundRecorder soundRecorder;
+        private SoundPlayer soundPlayer;
+
+        private Queue<VoiceMessage> voiceMessageQueue;
+
+        private const string MESSAGE_NO_CAPTUREDEVICE_FOUND_STRING = "Voicebroadcast konnte kein Aufnahmegerät (Mikrofon) finden!\nBitte überprüfen Sie die Einstellungen.";
+        private const string ERROR_PLAYING_VOICEMESSAGE_STRING = "Fehler beim Abspielen der Broadcast-Nachricht.";
 
         public MainForm()
         {
             InitializeComponent();
+
+            voiceMessageQueue = new Queue<VoiceMessage>();
 
             client = new TcpBroadcastClient();
             client.ClientVoiceMessageReceivedEvent += Client_ClientVoiceMessageReceivedEvent;
@@ -57,6 +65,7 @@ namespace VoiceBroadcastClient
         {
             disposeVoiceMessageReceivedBallonTip();
 
+            // new balloon ...
             voiceMessageReceivedBallonTip = new NotifyIcon();
             voiceMessageReceivedBallonTip.BalloonTipClosed += VoiceMessageReceivedBallonTip_BalloonTipClosed;
             voiceMessageReceivedBallonTip.BalloonTipClicked += VoiceMessageReceivedBallonTip_BalloonTipClosed;
@@ -82,51 +91,168 @@ namespace VoiceBroadcastClient
         {
             executeCodeOnUIThread(() =>
             {
-                showVoiceMessageReceivedBallonTip(e.VoiceMessage);
-                var conf = AppConfiguration.ReadConfig();
+                try
+                {
+                    int renderDeviceId = getActiveRenderDeviceId();
 
-                if (conf.RenderDevice.Id >= 0)
-                {
-                    if (soundPlayer != null)
+                    if (renderDeviceId >= 0)
                     {
-                        // todo warte schlange !!
+                        lock (voiceMessageQueue)
+                        {
+                            voiceMessageQueue.Enqueue(e.VoiceMessage);
+                        }
+
+                        if (soundPlayer == null)
+                        {
+                            soundPlayer = new SoundPlayer(renderDeviceId);
+                            soundPlayer.PlaybackStopped += soundPlayer_PlaybackStopped;
+
+                            VoiceMessage voiceMessageData = null;
+                            lock (voiceMessageQueue)
+                            {
+                                voiceMessageData= voiceMessageQueue.Dequeue();
+                            }
+                            showVoiceMessageReceivedBallonTip(e.VoiceMessage);
+                            soundPlayer.Play(voiceMessageData.Data);
+                        }
                     }
-                    soundPlayer = new NAudioWrapper.Player(AppConfiguration.ReadConfig().RenderDevice.Id);
-                    soundPlayer.PlaybackStopped += soundPlayer_PlaybackStopped;
-                    soundPlayer.Play(e.VoiceMessage.Data);
-                }
-                else
-                {
-                    executeCodeOnUIThread(() =>
+                    else
                     {
                         MessageBoxManager.ShowMessageBoxError("Fehler beim Abspielen der Broadcast-Nachricht, da kein Ausgabegerät gefunden werden konnte.");
-                    });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBoxManager.ShowMessageBoxError(ERROR_PLAYING_VOICEMESSAGE_STRING);
+                    Logger.log.Error(ex);
                 }
             });
         }
         private void soundPlayer_PlaybackStopped(object sender, EventArgs e)
         {
-            soundPlayer.Stop();
+            Logger.log.Info("play stop");
+            int voiceMessageQueueCount = 0;
+            lock (voiceMessageQueue)
+            {
+                voiceMessageQueueCount = voiceMessageQueue.Count;
+            }
+
+            if (voiceMessageQueueCount > 0) // voicemessage data are in queue
+            {
+                VoiceMessage voiceMessage = null;
+                lock (voiceMessageQueue)
+                {
+                    voiceMessage = voiceMessageQueue.Dequeue();
+                }
+                executeCodeOnUIThread(() => {
+                    showVoiceMessageReceivedBallonTip(voiceMessage);
+                    try
+                    {
+                        soundPlayer.Play(voiceMessage.Data);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.log.Error(ex);
+                        MessageBoxManager.ShowMessageBoxError(ERROR_PLAYING_VOICEMESSAGE_STRING);
+                    }
+                });
+            }
+            else
+            {
+                soundPlayer.Stop();
+                soundPlayer = null;
+            }
+        }
+
+        private void playSound(byte[] soundData)
+        {
+
         }
         private void TrayIcon_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
+                int captureDeviceId = getActiveCaptureDeviceId();
                 if (!client.IsConnected)
                 {
                     MessageBoxManager.ShowMessageBoxError("Voicebroadcast hat keine Verbindung zum Server!");
                 }
-                else if (AppConfiguration.ReadConfig().CaptureDevice.Id <=-1)
+                else if (captureDeviceId >= 0)
                 {
-                    MessageBoxManager.ShowMessageBoxError("Voicebroadcast konnte kein Aufnamegerät (Mikrofon) finden!.\nBitte überprüfen Sie die Einstellungen.");
+                    setAppTaskbarIconState(true);
+                    showForm();
                 }
                 else
                 {
-                    setAppTaskbarIconState(true);
-                    hideForm();
-                    showForm();
+                    MessageBoxManager.ShowMessageBoxError(MESSAGE_NO_CAPTUREDEVICE_FOUND_STRING);
                 }
             }
+        }
+        private int getActiveRenderDeviceId()
+        {
+            // read config
+            var conf = AppConfiguration.ReadConfig();
+
+            // read active capture devices
+            var renderDevices = new AudioDeviceEnemerator().GetRenderDevices();
+
+            DeviceInfo device = new DeviceInfo();
+
+            // is config ok?
+            if (renderDevices.Exists(cd => cd.Id.Equals(conf.RenderDevice.Id)))
+            {
+                device = conf.RenderDevice;
+                return device.Id;
+            }
+            else if (renderDevices.Count > 0)
+            {
+                device = renderDevices.First();
+            }
+            conf.RenderDevice = device;
+
+            try
+            {
+                AppConfiguration.SaveConfig(conf);
+            }
+            catch (Exception ex)
+            {
+                Logger.log.Warn(ex);
+            }
+
+            return device.Id;
+        }
+        private int getActiveCaptureDeviceId()
+        {
+            // read config
+            var conf = AppConfiguration.ReadConfig();
+
+            // read active capture devices
+            var captureDevices = new AudioDeviceEnemerator().GetCaptureDevices();
+
+            DeviceInfo device = new DeviceInfo();
+
+            // is config ok?
+            if (captureDevices.Exists(cd=>cd.Id.Equals(conf.CaptureDevice.Id)))
+            {
+                device = conf.CaptureDevice;
+                return device.Id;
+            }
+            else if (captureDevices.Count>0)
+            {
+                device = captureDevices.First();
+            }
+            conf.CaptureDevice = device;
+
+            try
+            {
+                AppConfiguration.SaveConfig(conf);
+            }
+            catch (Exception ex)
+            {
+                Logger.log.Warn(ex);
+            }
+
+            return device.Id;
         }
         private void setAppTaskbarIconState(bool connected)
         {
@@ -146,20 +272,12 @@ namespace VoiceBroadcastClient
         }
         private void Client_ClientDisconnectedEvent(object obj, EventArgs e)
         {
-            try
+            executeCodeOnUIThread(() =>
             {
                 stopRecording();
-
-                executeCodeOnUIThread(() =>
-                {
-                    setAppTaskbarIconState(false);
-                    hideForm();
-                });
-            }
-            catch (Exception ex)
-            {
-                Logger.log.Error(ex);
-            }
+                setAppTaskbarIconState(false);
+                hideForm();
+            });
         }
         private void Client_ClientConnectedEvent(object obj, ClientConnectedEventArgs e)
         {
@@ -172,15 +290,10 @@ namespace VoiceBroadcastClient
         }
         private void openConfig(object sender, EventArgs e)
         {
-            if (configForm == null)
+            if (configForm==null || (!configForm.Visible && configForm.IsDisposed))
             {
                 configForm = new ConfigForm();
-            }
-            if (!configForm.Visible)
-            {
-                configForm.ShowDialog();
-                configForm.Close();
-                configForm = null;
+                configForm.Show();
             }
         }
         private void exit(object sender, EventArgs e)
@@ -270,41 +383,65 @@ namespace VoiceBroadcastClient
         }
         private void startRecording()
         {
-            btnRecord.Image = Properties.Resources.Speak_Off;
+            int captureDeviceId = getActiveCaptureDeviceId();
+            if (captureDeviceId>=0)
+            {
+                try
+                {
+                    btnRecord.Image = Properties.Resources.Speak_Off;
 
-            soundRecorder = new NAudioWrapper.Recorder(AppConfiguration.ReadConfig().CaptureDevice.Id);
-            soundRecorder.RecordingStoppedEvent += SoundRecorder_RecordingStoppedEvent;
+                    soundRecorder = new SoundRecorder(captureDeviceId);
+                    soundRecorder.RecordingStoppedEvent += SoundRecorder_RecordingStoppedEvent;
 
-            startTimerRecordingDuration();
-            soundRecorder.StartRecording();
+                    startTimerRecordingDuration();
+                    soundRecorder.Start();
+                }
+                catch (Exception ex)
+                {
+                    stopTimerRecordingDuration();
+                    soundRecorder = null;
+                    throw ex;
+                }
+            }
+            else
+            {
+                MessageBoxManager.ShowMessageBoxError(MESSAGE_NO_CAPTUREDEVICE_FOUND_STRING);
+            }
         }
         private void stopRecording()
         {
             btnRecord.Image = Properties.Resources.Speak_On;
             stopTimerRecordingDuration();
 
-            soundRecorder?.StopRecording(); // data are in callback method ....
+            soundRecorder?.Stop(); // data are in callback method ....
         }
-        private void SoundRecorder_RecordingStoppedEvent(object obj, NAudioWrapper.RecordingStoppedEventArgs e)
+        private void SoundRecorder_RecordingStoppedEvent(object obj, NAudioWrapper.SoundRecordingStoppedEventArgs e)
         {
-            // send voiceMessage ...
-            try
+            if (e.SoundeData.Length >= 10000 /*more than ~ 500 ms of recording time*/)
             {
-                client.SendVoiceMessage(new VoiceMessage(broadcastClient, e.SoundeData));
-            }
-            catch (Exception ex)
-            {
-                executeCodeOnUIThread(() =>
+                if (client.IsConnected)
                 {
-                    MessageBoxManager.ShowMessageBoxError("Fehler beim übertragen der Broadcast-Nachricht.\n\n\n" + ex.StackTrace);
-                });
-            }
-            finally
-            {
-                soundRecorder = null;
+                    try
+                    {
+                        client.SendVoiceMessage(new VoiceMessage(broadcastClient, e.SoundeData));
+                    }
+                    catch (Exception ex)
+                    {
+                        executeCodeOnUIThread(() =>
+                        {
+                            MessageBoxManager.ShowMessageBoxError("Fehler beim übertragen der Broadcast-Nachricht.\n\n\n" + ex.StackTrace);
+                        });
+                    }
+                }
+                else
+                {
+                    executeCodeOnUIThread(() =>
+                    {
+                        MessageBoxManager.ShowMessageBoxError("Ihre Broadcast-Nachricht konnte nicht versendet werden, da es keine Verbindung zum Server besteht.");
+                    });
+                }
             }
         }
-
         // display the elapsed time from stopWatchSoundRecording
         private void timerDuration_Tick(object sender, EventArgs e)
         {
