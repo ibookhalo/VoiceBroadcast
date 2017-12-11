@@ -19,6 +19,7 @@ namespace VoiceBroadcastClient
     public partial class MainForm : Form
     {
         private NotifyIcon appTaskbarIcon, voiceMessageReceivedBallonTip;
+
         private ConfigForm configForm;
         private bool allreadyShown, firstTimeShownTrayIcon;
         private TcpBroadcastClient client;
@@ -93,33 +94,27 @@ namespace VoiceBroadcastClient
             {
                 try
                 {
-                    int renderDeviceId = getActiveRenderDeviceId();
+                    int renderDeviceId = AppConfiguration.ReadConfig().RenderDevice.Id;
 
                     if (renderDeviceId >= 0)
                     {
                         lock (voiceMessageQueue)
                         {
                             voiceMessageQueue.Enqueue(e.VoiceMessage);
-                        }
-
-                        if (soundPlayer == null)
-                        {
-                            soundPlayer = new SoundPlayer(renderDeviceId);
-                            soundPlayer.PlaybackStopped += soundPlayer_PlaybackStopped;
-
-                            VoiceMessage voiceMessageData = null;
-                            lock (voiceMessageQueue)
+                            if (soundPlayer == null)
                             {
-                                voiceMessageData= voiceMessageQueue.Dequeue();
+                                soundPlayer = new SoundPlayer(renderDeviceId);
+                                soundPlayer.PlaybackStoppedEvent += soundPlayer_PlaybackStopped;
+
+                                showVoiceMessageReceivedBallonTip(e.VoiceMessage);
+                                soundPlayer.Play(voiceMessageQueue.Dequeue().Data);
                             }
-                            showVoiceMessageReceivedBallonTip(e.VoiceMessage);
-                            soundPlayer.Play(voiceMessageData.Data);
                         }
-                    }
+                    }/*
                     else
                     {
                         MessageBoxManager.ShowMessageBoxError("Fehler beim Abspielen der Broadcast-Nachricht, da kein Ausgabegerät gefunden werden konnte.");
-                    }
+                    }*/
                 }
                 catch (Exception ex)
                 {
@@ -130,43 +125,31 @@ namespace VoiceBroadcastClient
         }
         private void soundPlayer_PlaybackStopped(object sender, EventArgs e)
         {
-            Logger.log.Info("play stop");
-            int voiceMessageQueueCount = 0;
             lock (voiceMessageQueue)
             {
-                voiceMessageQueueCount = voiceMessageQueue.Count;
-            }
-
-            if (voiceMessageQueueCount > 0) // voicemessage data are in queue
-            {
-                VoiceMessage voiceMessage = null;
-                lock (voiceMessageQueue)
+                if (voiceMessageQueue.Count > 0) // voicemessage data are in queue
                 {
-                    voiceMessage = voiceMessageQueue.Dequeue();
+                    VoiceMessage voiceMessage = voiceMessageQueue.Dequeue();
+
+                    executeCodeOnUIThread(() => {
+                        showVoiceMessageReceivedBallonTip(voiceMessage);
+                        try
+                        {
+                            soundPlayer.Play(voiceMessage.Data);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.log.Error(ex);
+                            MessageBoxManager.ShowMessageBoxError(ERROR_PLAYING_VOICEMESSAGE_STRING);
+                        }
+                    });
                 }
-                executeCodeOnUIThread(() => {
-                    showVoiceMessageReceivedBallonTip(voiceMessage);
-                    try
-                    {
-                        soundPlayer.Play(voiceMessage.Data);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.log.Error(ex);
-                        MessageBoxManager.ShowMessageBoxError(ERROR_PLAYING_VOICEMESSAGE_STRING);
-                    }
-                });
+                else
+                {
+                    soundPlayer.Stop();
+                    soundPlayer = null;
+                }
             }
-            else
-            {
-                soundPlayer.Stop();
-                soundPlayer = null;
-            }
-        }
-
-        private void playSound(byte[] soundData)
-        {
-
         }
         private void TrayIcon_MouseClick(object sender, MouseEventArgs e)
         {
@@ -188,12 +171,13 @@ namespace VoiceBroadcastClient
                 }
             }
         }
-        private int getActiveRenderDeviceId()
+
+        /*private int getActiveRenderDeviceId()
         {
             // read config
             var conf = AppConfiguration.ReadConfig();
 
-            // read active capture devices
+            // read active render devices
             var renderDevices = new AudioDeviceEnemerator().GetRenderDevices();
 
             DeviceInfo device = new DeviceInfo();
@@ -221,6 +205,7 @@ namespace VoiceBroadcastClient
 
             return device.Id;
         }
+        */
         private int getActiveCaptureDeviceId()
         {
             // read config

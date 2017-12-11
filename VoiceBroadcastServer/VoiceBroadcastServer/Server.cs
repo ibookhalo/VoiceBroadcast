@@ -138,12 +138,18 @@ namespace VoiceBroadcastServer
         }
         private bool existsClientInClientListByTcpClientAndId(TcpClient tcpClient, uint clientID)
         {
-            return clients.Exists(client => client.Client.Id.Value.Equals(clientID) && client.TcpClient.Equals(tcpClient));
+            lock (clients)
+            {
+                return clients.Exists(client => client.Client.Id.Value.Equals(clientID) && client.TcpClient.Equals(tcpClient));
+            }
         }
 
         private ServerBroadcastClient getServerBroadcastClientByTcpClient(TcpClient tcpClient)
         {
-            return clients.Find(client => client.TcpClient.Equals(tcpClient));
+            lock (clients)
+            {
+                return clients.Find(client => client.TcpClient.Equals(tcpClient));
+            }
         }
         private void handleVoiceMessage(VoiceMessage voiceMessage, TcpClient sender, NetworkMessageReader networkMessageReader)
         {

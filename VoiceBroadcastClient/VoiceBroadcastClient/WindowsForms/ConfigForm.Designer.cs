@@ -51,7 +51,7 @@
             // 
             this.tbServerIP.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbServerIP.Location = new System.Drawing.Point(87, 57);
-            this.tbServerIP.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbServerIP.Margin = new System.Windows.Forms.Padding(2);
             this.tbServerIP.Name = "tbServerIP";
             this.tbServerIP.Size = new System.Drawing.Size(185, 24);
             this.tbServerIP.TabIndex = 2;
@@ -82,7 +82,7 @@
             // 
             this.nudServerPort.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.nudServerPort.Location = new System.Drawing.Point(87, 87);
-            this.nudServerPort.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.nudServerPort.Margin = new System.Windows.Forms.Padding(2);
             this.nudServerPort.Maximum = new decimal(new int[] {
             9999,
             0,
@@ -106,7 +106,7 @@
             // 
             this.ok.Font = new System.Drawing.Font("Arial", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ok.Location = new System.Drawing.Point(75, 263);
-            this.ok.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ok.Margin = new System.Windows.Forms.Padding(2);
             this.ok.Name = "ok";
             this.ok.Size = new System.Drawing.Size(142, 31);
             this.ok.TabIndex = 4;
@@ -129,7 +129,7 @@
             // 
             this.tbClientName.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbClientName.Location = new System.Drawing.Point(87, 27);
-            this.tbClientName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbClientName.Margin = new System.Windows.Forms.Padding(2);
             this.tbClientName.Name = "tbClientName";
             this.tbClientName.Size = new System.Drawing.Size(185, 24);
             this.tbClientName.TabIndex = 1;
@@ -142,9 +142,9 @@
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
             this.groupBox1.Location = new System.Drawing.Point(8, 144);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox1.Size = new System.Drawing.Size(283, 103);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
@@ -156,7 +156,7 @@
             this.cbOutput.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.cbOutput.FormattingEnabled = true;
             this.cbOutput.Location = new System.Drawing.Point(85, 59);
-            this.cbOutput.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.cbOutput.Margin = new System.Windows.Forms.Padding(2);
             this.cbOutput.Name = "cbOutput";
             this.cbOutput.Size = new System.Drawing.Size(185, 28);
             this.cbOutput.TabIndex = 14;
@@ -167,7 +167,7 @@
             this.cbInput.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.cbInput.FormattingEnabled = true;
             this.cbInput.Location = new System.Drawing.Point(85, 27);
-            this.cbInput.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.cbInput.Margin = new System.Windows.Forms.Padding(2);
             this.cbInput.Name = "cbInput";
             this.cbInput.Size = new System.Drawing.Size(185, 28);
             this.cbInput.TabIndex = 13;
@@ -204,9 +204,9 @@
             this.groupBox2.Controls.Add(this.nudServerPort);
             this.groupBox2.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
             this.groupBox2.Location = new System.Drawing.Point(8, 8);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox2.Size = new System.Drawing.Size(283, 125);
             this.groupBox2.TabIndex = 15;
             this.groupBox2.TabStop = false;
@@ -222,7 +222,7 @@
             this.Controls.Add(this.ok);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

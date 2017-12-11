@@ -43,38 +43,29 @@ namespace VoiceBroadcastClient
                 var captureDevices = audioDeviceEnum.GetCaptureDevices();
 
                 //Output
-                if (renderDevices.Count == 0)
+                if (config.RenderDevice.Id >= 0 && renderDevices.Exists(rd => rd.Id.Equals(config.RenderDevice.Id)))
                 {
-                    cbOutput.Items.Add(new DeviceInfo());
+                    // device is active
+                    cbOutput.Items.Add(config.RenderDevice);
                 }
-                else 
-                {
-                    if (config.RenderDevice.Id >= 0 && renderDevices.Exists(rd => rd.Id.Equals(config.RenderDevice.Id)))
-                    {
-                        // device is active
-                        cbOutput.Items.Add(config.RenderDevice);
-                    }
-                    renderDevices.RemoveAll(rd => rd.Id.Equals(config.RenderDevice.Id));
-                    cbOutput.Items.AddRange(renderDevices.ToArray());
-                }
+                renderDevices.RemoveAll(rd => rd.Id.Equals(config.RenderDevice.Id));
+                cbOutput.Items.AddRange(renderDevices.ToArray());
+                cbOutput.Items.Add(new DeviceInfo());
+
                 cbOutput.SelectedIndex = 0;
                 config.RenderDevice = cbOutput.SelectedItem as DeviceInfo;
 
                 //Input
-                if (captureDevices.Count == 0)
+
+                if (config.CaptureDevice.Id >= 0 && captureDevices.Exists(cd => cd.Id.Equals(config.CaptureDevice.Id)))
                 {
-                    cbInput.Items.Add(new DeviceInfo());
+                    // device is active
+                    cbInput.Items.Add(config.CaptureDevice);
                 }
-                else
-                {
-                    if (config.CaptureDevice.Id >= 0 && captureDevices.Exists(cd => cd.Id.Equals(config.CaptureDevice.Id)))
-                    {
-                        // device is active
-                        cbInput.Items.Add(config.CaptureDevice);
-                    }
-                    captureDevices.RemoveAll(rd => rd.Id.Equals(config.CaptureDevice.Id));
-                    cbInput.Items.AddRange(captureDevices.ToArray());
-                }
+                captureDevices.RemoveAll(rd => rd.Id.Equals(config.CaptureDevice.Id));
+                cbInput.Items.AddRange(captureDevices.ToArray());
+                cbInput.Items.Add(new DeviceInfo());
+
                 cbInput.SelectedIndex = 0;
                 config.CaptureDevice = cbInput.SelectedItem as DeviceInfo;
 
