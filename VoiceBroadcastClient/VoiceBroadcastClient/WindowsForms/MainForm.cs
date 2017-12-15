@@ -94,7 +94,7 @@ namespace VoiceBroadcastClient
             {
                 try
                 {
-                    int renderDeviceId = AppConfiguration.ReadConfig().RenderDevice.Id;
+                    int renderDeviceId = new AudioDeviceEnemerator().GetRenderDeviceIdByProductGUID(AppConfiguration.ReadConfig().RenderDevice.ProductGuid);
 
                     if (renderDeviceId >= 0)
                     {
@@ -103,18 +103,21 @@ namespace VoiceBroadcastClient
                             voiceMessageQueue.Enqueue(e.VoiceMessage);
                             if (soundPlayer == null)
                             {
+                                showVoiceMessageReceivedBallonTip(e.VoiceMessage);
+
                                 soundPlayer = new SoundPlayer(renderDeviceId);
                                 soundPlayer.PlaybackStoppedEvent += soundPlayer_PlaybackStopped;
 
-                                showVoiceMessageReceivedBallonTip(e.VoiceMessage);
                                 soundPlayer.Play(voiceMessageQueue.Dequeue().Data);
                             }
                         }
-                    }/*
+                    }
                     else
                     {
-                        MessageBoxManager.ShowMessageBoxError("Fehler beim Abspielen der Broadcast-Nachricht, da kein Ausgabegerät gefunden werden konnte.");
-                    }*/
+                        showVoiceMessageReceivedBallonTip(e.VoiceMessage);
+                        //MessageBoxManager.ShowMessageBoxError("Fehler beim Abspielen der Broadcast-Nachricht, da kein Ausgabegerät gefunden werden konnte.");
+                    }
+                    
                 }
                 catch (Exception ex)
                 {
@@ -214,30 +217,23 @@ namespace VoiceBroadcastClient
             // read active capture devices
             var captureDevices = new AudioDeviceEnemerator().GetCaptureDevices();
 
-            DeviceInfo device = new DeviceInfo();
+            DeviceInfo activeCaptureDevice = new DeviceInfo();
 
             // is config ok?
-            if (captureDevices.Exists(cd=>cd.Id.Equals(conf.CaptureDevice.Id)))
+            if (captureDevices.Exists(cd=>cd.ProductGuid.Equals(conf.CaptureDevice.ProductGuid)))
             {
-                device = conf.CaptureDevice;
-                return device.Id;
+                activeCaptureDevice=conf.CaptureDevice;
             }
             else if (captureDevices.Count>0)
             {
-                device = captureDevices.First();
+                activeCaptureDevice = captureDevices.First();
             }
-            conf.CaptureDevice = device;
-
-            try
+            else
             {
-                AppConfiguration.SaveConfig(conf);
-            }
-            catch (Exception ex)
-            {
-                Logger.log.Warn(ex);
+                return -1;
             }
 
-            return device.Id;
+            return new AudioDeviceEnemerator().GetCaptureDeviceIdByProductGUID(activeCaptureDevice.ProductGuid);
         }
         private void setAppTaskbarIconState(bool connected)
         {

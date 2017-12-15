@@ -112,6 +112,7 @@ namespace VoiceBroadcastServer
         private void MessageReader_ReadError(object obj, Network.EventArgs.NetworkMessageErrorEventArgs e)
         {
             Logger.log.Info($"Read error: {getServerBroadcastClientByTcpClient(e.TcpClient)?.Client}");
+            Logger.log.Error(e.Exception);
             removeClientFromListByTcpClient(e.TcpClient, true);
         }
         private void MessageWriter_WriteError(object obj, Network.EventArgs.NetworkMessageWriterWriteErrorEventArgs e)
@@ -211,6 +212,7 @@ namespace VoiceBroadcastServer
                 }
                 else
                 {
+                    Logger.log.Warn("BroadCastClient name not ok");
                     // close
                     sender.Close();
                 }

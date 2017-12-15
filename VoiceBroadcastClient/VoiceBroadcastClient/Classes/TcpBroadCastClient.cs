@@ -109,6 +109,8 @@ namespace VoiceBroadcastClient.Classes
         private void handleClientDisconnected()
         {
             IsConnected = false;
+            IsConnecting = false;
+
             if (!isClientDisconnectedEventAlreadyFired)
             {
                 ClientDisconnectedEvent?.BeginInvoke(this, new EventArgs(), null, null);
@@ -181,12 +183,24 @@ namespace VoiceBroadcastClient.Classes
             IsConnecting = true;
 
             var config = AppConfiguration.ReadConfig();
-            tcpClient.BeginConnect(config.ServerIP, config.ServerPort, tcpClientConnectCallback, config);
-
-            if (autoReconnectTimer == null)
+            try
             {
-                autoReconnectTimer = new System.Threading.Timer(autoReconnectTimerCallback, null, autoReconnectTimerIntervalInMs, autoReconnectTimerIntervalInMs);
+                tcpClient.BeginConnect(config.ServerIP, config.ServerPort, tcpClientConnectCallback, config);
             }
+            catch (Exception ex)
+            {
+                IsConnected = false;
+                IsConnecting = false;
+                throw ex;
+            }
+            finally
+            {
+                if (autoReconnectTimer == null)
+                {
+                    autoReconnectTimer = new System.Threading.Timer(autoReconnectTimerCallback, null, autoReconnectTimerIntervalInMs, autoReconnectTimerIntervalInMs);
+                }
+            }
+
         }
 
         private void tcpClientConnectCallback(IAsyncResult ar)

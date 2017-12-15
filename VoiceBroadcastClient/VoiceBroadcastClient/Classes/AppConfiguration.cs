@@ -25,10 +25,12 @@ namespace VoiceBroadcastClient
         private static readonly object appconfigLocker = new object();
 
         [NonSerialized()]
-        private static readonly string CONFIG_PATH = Path.Combine(Path.GetTempPath(),"voicebroadcast.conf");
+        private static readonly string CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "voicebroadcast.conf");
 
         public AppConfiguration()
-        { }
+        {
+
+        }
         public AppConfiguration(string ip,int port,string clientname,DeviceInfo captureDevice,DeviceInfo renderDevice)
         {
             this.ServerIP = ip;

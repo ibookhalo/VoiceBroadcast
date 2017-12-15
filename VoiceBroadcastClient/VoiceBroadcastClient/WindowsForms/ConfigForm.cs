@@ -43,32 +43,44 @@ namespace VoiceBroadcastClient
                 var captureDevices = audioDeviceEnum.GetCaptureDevices();
 
                 //Output
-                if (config.RenderDevice.Id >= 0 && renderDevices.Exists(rd => rd.Id.Equals(config.RenderDevice.Id)))
-                {
-                    // device is active
-                    cbOutput.Items.Add(config.RenderDevice);
-                }
-                renderDevices.RemoveAll(rd => rd.Id.Equals(config.RenderDevice.Id));
                 cbOutput.Items.AddRange(renderDevices.ToArray());
-                cbOutput.Items.Add(new DeviceInfo());
+                DeviceInfo itemToSelect = cbOutput.Items.Cast<DeviceInfo>().ToList().Find(di => di.ProductGuid.Equals(config.RenderDevice.ProductGuid));
 
-                cbOutput.SelectedIndex = 0;
+                DeviceInfo noDeviceOutput = new DeviceInfo();
+                cbOutput.Items.Add(noDeviceOutput); // kein Gerät
+                
+                if (itemToSelect!=null)
+                {
+                    // select
+                    cbOutput.SelectedItem = itemToSelect;
+                }
+                else
+                {
+                    cbOutput.SelectedItem = noDeviceOutput;
+                }
                 config.RenderDevice = cbOutput.SelectedItem as DeviceInfo;
 
                 //Input
-
-                if (config.CaptureDevice.Id >= 0 && captureDevices.Exists(cd => cd.Id.Equals(config.CaptureDevice.Id)))
-                {
-                    // device is active
-                    cbInput.Items.Add(config.CaptureDevice);
-                }
-                captureDevices.RemoveAll(rd => rd.Id.Equals(config.CaptureDevice.Id));
                 cbInput.Items.AddRange(captureDevices.ToArray());
-                cbInput.Items.Add(new DeviceInfo());
+                DeviceInfo itemToSelectInput = cbInput.Items.Cast<DeviceInfo>().ToList().Find(di => di.ProductGuid.Equals(config.CaptureDevice.ProductGuid));
 
-                cbInput.SelectedIndex = 0;
+                if (itemToSelectInput != null)
+                {
+                    // select
+                    cbInput.SelectedItem = itemToSelectInput;
+                }
+                else if (captureDevices.Count>0)
+                {
+                    cbInput.SelectedIndex = 0;
+                }
+                else
+                {
+                    DeviceInfo noDeviceInput = new DeviceInfo();
+                    cbInput.Items.Add(noDeviceInput);
+                    cbInput.SelectedItem = noDeviceInput;
+                }
+
                 config.CaptureDevice = cbInput.SelectedItem as DeviceInfo;
-
                 AppConfiguration.SaveConfig(config);
             }
             catch (Exception ex)
@@ -84,9 +96,6 @@ namespace VoiceBroadcastClient
                 Cursor.Current = Cursors.WaitCursor;
                 try
                 {
-                    string inputDeviceName = cbInput.SelectedItem.ToString();
-                    string outputDeviceName = cbOutput.SelectedItem.ToString();
-
                     AppConfiguration.SaveConfig(
                         new AppConfiguration(tbServerIP.Text, (int)nudServerPort.Value, tbClientName.Text, cbInput.SelectedItem as DeviceInfo, cbOutput.SelectedItem as DeviceInfo));
                     Close();

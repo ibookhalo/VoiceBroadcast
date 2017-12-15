@@ -27,6 +27,7 @@ namespace Network.Messaging
         {
             TcpClient = tcpClient;
         }
+       
         public void ReadAsync(bool readLoop = false)
         {
             this.readLoop = readLoop;
