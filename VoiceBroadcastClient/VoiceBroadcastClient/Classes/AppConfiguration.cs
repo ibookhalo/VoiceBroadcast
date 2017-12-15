@@ -25,7 +25,7 @@ namespace VoiceBroadcastClient
         private static readonly object appconfigLocker = new object();
 
         [NonSerialized()]
-        private static readonly string CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "voicebroadcast.conf");
+        private static readonly string CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "voicebroadcastClient", "voicebroadcastClient.conf");
 
         public AppConfiguration()
         {
@@ -48,6 +48,7 @@ namespace VoiceBroadcastClient
                     try
                     {
                         XmlSerializer ser = new XmlSerializer(typeof(AppConfiguration));
+                        ensureFolder(CONFIG_PATH);
                         using (FileStream fs = new FileStream(CONFIG_PATH, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
                             return cachedConfigs = (AppConfiguration)ser.Deserialize(fs);
@@ -73,12 +74,20 @@ namespace VoiceBroadcastClient
                 return cachedConfigs;
             }
         }
-
+        private static void ensureFolder(string path)
+        {
+            string directoryName = Path.GetDirectoryName(path);
+            if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+        }
         private static void serilize(AppConfiguration appConf)
         {
             try
             {
                 XmlSerializer ser = new XmlSerializer(typeof(AppConfiguration));
+                ensureFolder(CONFIG_PATH);
                 using (TextWriter WriteFileStream = new StreamWriter(CONFIG_PATH))
                 {
                     ser.Serialize(WriteFileStream, appConf);

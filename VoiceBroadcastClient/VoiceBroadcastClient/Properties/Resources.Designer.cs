@@ -91,12 +91,25 @@ namespace VoiceBroadcastClient.Properties {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &lt;log4net&gt;
+        ///  &lt;root&gt;
+        ///    &lt;level value=&quot;ALL&quot; /&gt;
+        ///    &lt;appender-ref ref=&quot;console&quot; /&gt;
+        ///    &lt;appender-ref ref=&quot;file&quot; /&gt;
+        ///  &lt;/root&gt;
+        ///  &lt;appender name=&quot;console&quot; type=&quot;log4net.Appender.ConsoleAppender&quot;&gt;
+        ///    &lt;layout type=&quot;log4net.Layout.PatternLayout&quot;&gt;
+        ///      &lt;conversionPattern value=&quot;%date %level %logger - %message%newline&quot; /&gt;
+        ///    &lt;/layout&gt;
+        ///  &lt;/appender&gt;
+        ///  &lt;appender name=&quot;file&quot; type=&quot;log4net.Appender.RollingFileAppender&quot;&gt;
+        ///    &lt;file value=&quot;log.data&quot; /&gt;
+        ///    &lt;appendToFile value=&quot;true&quot; /&gt;
+        ///    &lt;rollingStyle valu [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
-        internal static System.Drawing.Bitmap Speak_On {
+        internal static string log4net {
             get {
-                object obj = ResourceManager.GetObject("Speak_On", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ResourceManager.GetString("log4net", resourceCulture);
             }
         }
         
@@ -106,6 +119,16 @@ namespace VoiceBroadcastClient.Properties {
         internal static System.Drawing.Bitmap Speak_Off {
             get {
                 object obj = ResourceManager.GetObject("Speak_Off", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Speak_On {
+            get {
+                object obj = ResourceManager.GetObject("Speak_On", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
