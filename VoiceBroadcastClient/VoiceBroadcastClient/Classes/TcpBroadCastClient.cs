@@ -104,7 +104,8 @@ namespace VoiceBroadcastClient.Classes
                     Logger.log.Warn(ex);
                     return false;
                 }
-            }          
+            }
+            return true;
         }
         private void handleClientDisconnected()
         {

@@ -50,17 +50,17 @@
             // tbServerIP
             // 
             this.tbServerIP.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbServerIP.Location = new System.Drawing.Point(87, 57);
+            this.tbServerIP.Location = new System.Drawing.Point(101, 57);
             this.tbServerIP.Margin = new System.Windows.Forms.Padding(2);
             this.tbServerIP.Name = "tbServerIP";
-            this.tbServerIP.Size = new System.Drawing.Size(185, 24);
+            this.tbServerIP.Size = new System.Drawing.Size(171, 24);
             this.tbServerIP.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(11, 58);
+            this.label1.Location = new System.Drawing.Point(10, 58);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(59, 20);
@@ -71,7 +71,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(11, 87);
+            this.label2.Location = new System.Drawing.Point(10, 87);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(70, 20);
@@ -81,7 +81,7 @@
             // nudServerPort
             // 
             this.nudServerPort.Font = new System.Drawing.Font("Arial Narrow", 11F);
-            this.nudServerPort.Location = new System.Drawing.Point(87, 87);
+            this.nudServerPort.Location = new System.Drawing.Point(101, 87);
             this.nudServerPort.Margin = new System.Windows.Forms.Padding(2);
             this.nudServerPort.Maximum = new decimal(new int[] {
             9999,
@@ -94,7 +94,7 @@
             0,
             0});
             this.nudServerPort.Name = "nudServerPort";
-            this.nudServerPort.Size = new System.Drawing.Size(183, 24);
+            this.nudServerPort.Size = new System.Drawing.Size(169, 24);
             this.nudServerPort.TabIndex = 3;
             this.nudServerPort.Value = new decimal(new int[] {
             6666,
@@ -118,7 +118,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(12, 29);
+            this.label3.Location = new System.Drawing.Point(11, 29);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(73, 20);
@@ -128,10 +128,10 @@
             // tbClientName
             // 
             this.tbClientName.Font = new System.Drawing.Font("Arial Narrow", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbClientName.Location = new System.Drawing.Point(87, 27);
+            this.tbClientName.Location = new System.Drawing.Point(101, 27);
             this.tbClientName.Margin = new System.Windows.Forms.Padding(2);
             this.tbClientName.Name = "tbClientName";
-            this.tbClientName.Size = new System.Drawing.Size(185, 24);
+            this.tbClientName.Size = new System.Drawing.Size(171, 24);
             this.tbClientName.TabIndex = 1;
             // 
             // groupBox1
@@ -155,10 +155,10 @@
             this.cbOutput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbOutput.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.cbOutput.FormattingEnabled = true;
-            this.cbOutput.Location = new System.Drawing.Point(85, 59);
+            this.cbOutput.Location = new System.Drawing.Point(99, 59);
             this.cbOutput.Margin = new System.Windows.Forms.Padding(2);
             this.cbOutput.Name = "cbOutput";
-            this.cbOutput.Size = new System.Drawing.Size(185, 28);
+            this.cbOutput.Size = new System.Drawing.Size(171, 28);
             this.cbOutput.TabIndex = 14;
             // 
             // cbInput
@@ -166,10 +166,10 @@
             this.cbInput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbInput.Font = new System.Drawing.Font("Arial Narrow", 11F);
             this.cbInput.FormattingEnabled = true;
-            this.cbInput.Location = new System.Drawing.Point(85, 27);
+            this.cbInput.Location = new System.Drawing.Point(99, 27);
             this.cbInput.Margin = new System.Windows.Forms.Padding(2);
             this.cbInput.Name = "cbInput";
-            this.cbInput.Size = new System.Drawing.Size(185, 28);
+            this.cbInput.Size = new System.Drawing.Size(171, 28);
             this.cbInput.TabIndex = 13;
             // 
             // label5
