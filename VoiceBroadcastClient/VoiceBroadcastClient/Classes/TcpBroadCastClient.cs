@@ -198,7 +198,7 @@ namespace VoiceBroadcastClient.Classes
             {
                 if (autoReconnectTimer == null)
                 {
-                    autoReconnectTimer = new System.Threading.Timer(autoReconnectTimerCallback, null, autoReconnectTimerIntervalInMs, autoReconnectTimerIntervalInMs);
+                   autoReconnectTimer = new System.Threading.Timer(autoReconnectTimerCallback, null, autoReconnectTimerIntervalInMs, autoReconnectTimerIntervalInMs);
                 }
             }
 
