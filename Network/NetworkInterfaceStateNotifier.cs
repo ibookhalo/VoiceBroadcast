@@ -35,7 +35,7 @@ namespace Network
         }
         private void adapterStateCheckerTimerCallback(object state)
         {
-            if (!NetworkInfoRetriever.IsNetworkAdapterUp(IPAddress))
+            if (!IPAddress.IsLoopback(IPAddress) && !NetworkInfoRetriever.IsNetworkAdapterUp(IPAddress))
             {
                 NetworkInterfaceIsNotUpEvent?.BeginInvoke(this, new System.EventArgs(), null, null);
             }
